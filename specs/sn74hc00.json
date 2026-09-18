@@ -1,0 +1,522 @@
+{
+  "format": "silicon-city/v1",
+  "id": "sn74hc00",
+  "name": "SN74HC00 quad NAND",
+  "part": "Texas Instruments SN74HC00",
+  "revision": "Boolean model 1",
+  "summary": "Four independent two-input NAND channels at ideal logic levels. Each gate implements NOT(A AND B), with a complete two-input truth-table check.",
+  "abstraction": "boolean-functional",
+  "sources": [
+    {
+      "id": "ti_hc00",
+      "title": "TI SNx4HC00 Quadruple 2-Input NAND Gates",
+      "url": "https://www.ti.com/lit/gpn/SN74HC00",
+      "revision": "SCLS181H, August 2021",
+      "locator": "Section 8.6, Table 8-1, page 10",
+      "reviewed": "2026-09-18",
+      "sha256": "706cc4f5fd012f080ccd4a50f5fcc4136ef09dbc6e76e87ba85ae2d4cbb24efe",
+      "publisher": "Texas Instruments",
+      "type": "datasheet",
+      "redistribution": "link-only"
+    }
+  ],
+  "groups": [
+    {
+      "id": "channel_one",
+      "label": "Channel 1",
+      "description": "Independent NAND gate 1."
+    },
+    {
+      "id": "channel_two",
+      "label": "Channel 2",
+      "description": "Independent NAND gate 2."
+    },
+    {
+      "id": "channel_three",
+      "label": "Channel 3",
+      "description": "Independent NAND gate 3."
+    },
+    {
+      "id": "channel_four",
+      "label": "Channel 4",
+      "description": "Independent NAND gate 4."
+    }
+  ],
+  "inputs": [
+    {
+      "id": "a1",
+      "label": "1A",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_one",
+      "description": "Channel 1 input A.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "b1",
+      "label": "1B",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_one",
+      "description": "Channel 1 input B.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "a2",
+      "label": "2A",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_two",
+      "description": "Channel 2 input A.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "b2",
+      "label": "2B",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_two",
+      "description": "Channel 2 input B.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "a3",
+      "label": "3A",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_three",
+      "description": "Channel 3 input A.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "b3",
+      "label": "3B",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_three",
+      "description": "Channel 3 input B.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "a4",
+      "label": "4A",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_four",
+      "description": "Channel 4 input A.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "b4",
+      "label": "4B",
+      "kind": "boolean",
+      "default": false,
+      "group": "channel_four",
+      "description": "Channel 4 input B.",
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": "y1",
+      "label": "NAND 1",
+      "kind": "gate",
+      "group": "channel_one",
+      "description": "1Y is low only when 1A and 1B are both high.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "op": "and",
+            "args": [
+              {
+                "var": "a1"
+              },
+              {
+                "var": "b1"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "y2",
+      "label": "NAND 2",
+      "kind": "gate",
+      "group": "channel_two",
+      "description": "2Y is low only when 2A and 2B are both high.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "op": "and",
+            "args": [
+              {
+                "var": "a2"
+              },
+              {
+                "var": "b2"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "y3",
+      "label": "NAND 3",
+      "kind": "gate",
+      "group": "channel_three",
+      "description": "3Y is low only when 3A and 3B are both high.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "op": "and",
+            "args": [
+              {
+                "var": "a3"
+              },
+              {
+                "var": "b3"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "y4",
+      "label": "NAND 4",
+      "kind": "gate",
+      "group": "channel_four",
+      "description": "4Y is low only when 4A and 4B are both high.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "op": "and",
+            "args": [
+              {
+                "var": "a4"
+              },
+              {
+                "var": "b4"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_hc00"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "outputs": [
+    {
+      "id": "out1",
+      "label": "1Y",
+      "signal": "y1",
+      "description": "Channel 1 logical output.",
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    },
+    {
+      "id": "out2",
+      "label": "2Y",
+      "signal": "y2",
+      "description": "Channel 2 logical output.",
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    },
+    {
+      "id": "out3",
+      "label": "3Y",
+      "signal": "y3",
+      "description": "Channel 3 logical output.",
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    },
+    {
+      "id": "out4",
+      "label": "4Y",
+      "signal": "y4",
+      "description": "Channel 4 logical output.",
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "nand_truth",
+      "text": "Each channel outputs low only for two high inputs, and high otherwise.",
+      "signals": [
+        "y1",
+        "y2",
+        "y3",
+        "y4"
+      ],
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    },
+    {
+      "id": "isolation",
+      "text": "Channels have independent input/output functions.",
+      "signals": [
+        "y1",
+        "y2",
+        "y3",
+        "y4"
+      ],
+      "sourceRefs": [
+        "ti_hc00"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "id": "all_pairs",
+      "label": "Four NAND truth tables",
+      "requirements": [
+        "nand_truth"
+      ],
+      "steps": [
+        {
+          "set": {},
+          "expect": {
+            "y1": true,
+            "y2": true,
+            "y3": true,
+            "y4": true
+          }
+        },
+        {
+          "set": {
+            "b1": true,
+            "b2": true,
+            "b3": true,
+            "b4": true
+          },
+          "expect": {
+            "y1": true,
+            "y2": true,
+            "y3": true,
+            "y4": true
+          }
+        },
+        {
+          "set": {
+            "a1": true,
+            "a2": true,
+            "a3": true,
+            "a4": true,
+            "b1": false,
+            "b2": false,
+            "b3": false,
+            "b4": false
+          },
+          "expect": {
+            "y1": true,
+            "y2": true,
+            "y3": true,
+            "y4": true
+          }
+        },
+        {
+          "set": {
+            "b1": true,
+            "b2": true,
+            "b3": true,
+            "b4": true
+          },
+          "expect": {
+            "y1": false,
+            "y2": false,
+            "y3": false,
+            "y4": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "independent",
+      "label": "One channel changes at a time",
+      "requirements": [
+        "isolation"
+      ],
+      "steps": [
+        {
+          "set": {
+            "a1": true,
+            "b1": true
+          },
+          "expect": {
+            "y1": false,
+            "y2": true,
+            "y3": true,
+            "y4": true
+          }
+        },
+        {
+          "set": {
+            "a3": true,
+            "b3": true
+          },
+          "expect": {
+            "y1": false,
+            "y2": true,
+            "y3": false,
+            "y4": true
+          }
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Inputs already meet valid CMOS high/low voltage requirements; VCC and ground are valid.",
+    "Two-valued, zero-delay functional logic; connections show data dependency rather than a transistor netlist."
+  ],
+  "omissions": [
+    "Input thresholds and transition limits, supply voltage, output drive, loading, propagation delay, temperature, and power behavior.",
+    "A passing Boolean truth table does not verify electrical suitability or pin/package wiring."
+  ]
+}

@@ -29,6 +29,13 @@ Optional native arithmetic runs and local-runtime timings are separately labelle
 measurements. They are not measurements of the city's synthetic per-engine
 utilization, TOPS or power, and do not establish trained-model accuracy.
 
+The Logic Lab adds scoped functional examples referencing Texas Instruments
+and RISC-V International documents. Names and part numbers identify references
+and do not imply affiliation or endorsement. Vendor documents and diagrams are
+not redistributed. Logical geometry is illustrative. Passing declared vectors
+does not establish electrical, timing, analog, full-ISA, or full-device conformance.
+Additional logic-library license metadata is in docs/logic-dependencies.json.
+
 ATTRIBUTION
 -----------
 Inspired by PGSimCity by Nikolay Samokhvalov (https://github.com/NikolayS/PGSimCity),

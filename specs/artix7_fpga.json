@@ -1,0 +1,115 @@
+{
+  "format": "silicon-city/v1", "id": "artix7_fpga", "name": "Artix 7 FPGA logic fabric",
+  "part": "AMD Artix 7 family / primitive network", "deviceClass": "fpga", "revision": "Configured primitive contract 1",
+  "summary": "An executable LUT6, two FDRE-style registers, four carry stages, and a route mux inside an expandable FPGA resource map. This is a configured teaching network, not a complete CLB, bitstream loader, or full-device simulator.",
+  "abstraction": "subsystem-contract",
+  "sources": [
+    { "id": "amd_artix", "title": "AMD Artix 7 FPGA family", "url": "https://www.amd.com/en/products/adaptive-socs-and-fpgas/fpga/artix-7.html", "revision": "Product page reviewed 2026-09-18", "locator": "Product Advantages and Product Table: programmable logic, DSP slices, block memory and I/O", "reviewed": "2026-09-18", "publisher": "AMD", "type": "manual", "redistribution": "link-only" },
+    { "id": "yosys_cells", "title": "Yosys Xilinx simulation primitive definitions", "url": "https://raw.githubusercontent.com/YosysHQ/yosys/main/techlibs/xilinx/cells_sim.v", "revision": "Main snapshot reviewed 2026-09-18", "locator": "LUT6 lines 258-274; CARRY4 lines 372-385; FDRE lines 476-497; functional logic only, not specify timing", "reviewed": "2026-09-18", "publisher": "YosysHQ", "type": "implementation", "redistribution": "link-only", "sha256": "10f8afc61bf708949ebf238294327dce95eaa68919bb0ab5938d40f24e39d15e" }
+  ],
+  "groups": [
+    { "id": "fabric", "label": "Configured logic fabric", "description": "Representative primitive network. The selected function and number of cells are this example's design choices, not the device's resource count." },
+    { "id": "lut_tile", "label": "LUT6 configuration", "parent": "fabric", "description": "Six address inputs select one of 64 configured bits. The example INIT implements parity." },
+    { "id": "register_tile", "label": "Clocked register stages", "parent": "fabric", "description": "Two rising-edge registers with common clock enable and synchronous reset; simultaneous updates preserve pipeline latency." },
+    { "id": "carry_tile", "label": "Four-stage carry chain", "parent": "fabric", "description": "CARRY4 functional relationships. I0-I3 are used as S[0:3]; DI inputs are independent carry-generate selections." },
+    { "id": "routing", "label": "Selectable output route", "parent": "fabric", "description": "An explicit teaching mux chooses the combinational LUT result or first registered result." },
+    { "id": "configuration", "label": "Device configuration", "description": "LUT configuration bits are part of the JSON specification. Loading a real vendor bitstream is not implemented." },
+    { "id": "hard_blocks", "label": "BRAM and DSP resources", "description": "Family-level resources shown as unexecuted boundaries; capacities depend on a selected SKU." },
+    { "id": "io", "label": "I/O and clock context", "description": "Package I/O and physical clock distribution are distinct from the lab's ideal Boolean signals." }
+  ],
+  "inputs": [
+    { "id": "i0", "label": "I0 / S0", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 0, the least significant bit. Also drives carry-select bit 0 in this example.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "i1", "label": "I1 / S1", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 1 and example carry-select bit 1.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "i2", "label": "I2 / S2", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 2 and example carry-select bit 2.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "i3", "label": "I3 / S3", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 3 and example carry-select bit 3.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "i4", "label": "I4", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 4.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "i5", "label": "I5", "kind": "boolean", "default": false, "group": "lut_tile", "description": "LUT address bit 5, the highest address bit of this LUT6.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "clk", "label": "Register clock", "kind": "boolean", "default": false, "group": "register_tile", "description": "An ideal positive-edge clock input. Use vector steps to distinguish levels from edges.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "ce", "label": "Clock enable", "kind": "boolean", "default": true, "group": "register_tile", "description": "Capture data on a rising clock edge when CE is high and reset is low.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "reset", "label": "Synchronous reset", "kind": "boolean", "default": false, "group": "register_tile", "description": "At a rising edge, reset overrides clock enable. Asserting it without an edge does not clear the FDRE-style registers.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "registered_route", "label": "Use registered output", "kind": "boolean", "default": false, "group": "routing", "description": "Teaching route selection. This is not a runtime write to a real Artix routing bitstream.", "evidence": "illustrative", "sourceRefs": ["yosys_cells"] },
+    { "id": "ci", "label": "Carry input CI", "kind": "boolean", "default": false, "group": "carry_tile", "description": "Carry input from a preceding carry-chain block.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "cyinit", "label": "Carry initialization", "kind": "boolean", "default": false, "group": "carry_tile", "description": "CARRY4 starts with CI OR CYINIT.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "di0", "label": "Carry data DI0", "kind": "boolean", "default": false, "group": "carry_tile", "description": "Carry-generate selection for stage 0 when S0 is low.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "di1", "label": "Carry data DI1", "kind": "boolean", "default": false, "group": "carry_tile", "description": "Carry-generate selection for stage 1 when S1 is low.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "di2", "label": "Carry data DI2", "kind": "boolean", "default": false, "group": "carry_tile", "description": "Carry-generate selection for stage 2 when S2 is low.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "di3", "label": "Carry data DI3", "kind": "boolean", "default": false, "group": "carry_tile", "description": "Carry-generate selection for stage 3 when S3 is low.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] }
+  ],
+  "blocks": [
+    { "id": "lut_result", "label": "Configured LUT6", "kind": "lut", "inputs": ["i0", "i1", "i2", "i3", "i4", "i5"], "init": "0110100110010110100101100110100110010110011010010110100110010110", "group": "lut_tile", "description": "Six-input parity configured by the example INIT (0x6996966996696996 in MSB-first hexadecimal notation). The JSON stores address-zero first. Different contents create a different logic function, not a different hardware primitive.", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"], "properties": [{ "name": "Address inputs", "value": 6, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] }, { "name": "Configured bits", "value": 64, "unit": "bits", "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] }, { "name": "Example function", "value": "Parity (XOR of six inputs)", "evidence": "illustrative", "sourceRefs": [] }] },
+    { "id": "q0", "label": "FDRE register 0", "kind": "dff", "initial": false, "clock": "clk", "group": "register_tile", "description": "Positive edge, INIT=0, no pin inversion. Synchronous reset has priority over CE; CE low holds the old value.", "rule": { "op": "if", "args": [{ "var": "reset" }, false, { "op": "if", "args": [{ "var": "ce" }, { "var": "lut_result" }, { "var": "q0" }] }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "q1", "label": "FDRE register 1", "kind": "dff", "initial": false, "clock": "clk", "group": "register_tile", "description": "A second illustrative register samples the previous q0 on the same edge, demonstrating simultaneous commit rather than software statement order.", "rule": { "op": "if", "args": [{ "var": "reset" }, false, { "op": "if", "args": [{ "var": "ce" }, { "var": "q0" }, { "var": "q1" }] }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "routed_result", "label": "Output route mux", "kind": "gate", "group": "routing", "description": "Select the first register or bypass it with the LUT result. The connection is authored for this example, not a claimed device routing netlist.", "rule": { "op": "if", "args": [{ "var": "registered_route" }, { "var": "q0" }, { "var": "lut_result" }] }, "evidence": "illustrative", "sourceRefs": ["yosys_cells"] },
+    { "id": "carry_seed", "label": "Initial carry", "kind": "gate", "group": "carry_tile", "description": "The functional initial carry is CI OR CYINIT.", "rule": { "op": "or", "args": [{ "var": "ci" }, { "var": "cyinit" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "co0", "label": "Carry stage 0", "kind": "gate", "group": "carry_tile", "description": "S0 selects between the incoming carry and DI0.", "rule": { "op": "if", "args": [{ "var": "i0" }, { "var": "carry_seed" }, { "var": "di0" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "co1", "label": "Carry stage 1", "kind": "gate", "group": "carry_tile", "description": "S1 selects between CO0 and DI1.", "rule": { "op": "if", "args": [{ "var": "i1" }, { "var": "co0" }, { "var": "di1" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "co2", "label": "Carry stage 2", "kind": "gate", "group": "carry_tile", "description": "S2 selects between CO1 and DI2.", "rule": { "op": "if", "args": [{ "var": "i2" }, { "var": "co1" }, { "var": "di2" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "co3", "label": "Carry stage 3", "kind": "gate", "group": "carry_tile", "description": "S3 selects between CO2 and DI3; this is the chain's final carry.", "rule": { "op": "if", "args": [{ "var": "i3" }, { "var": "co2" }, { "var": "di3" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "sum0", "label": "Carry XOR output 0", "kind": "gate", "group": "carry_tile", "description": "O0 is S0 XOR initial carry, not S0 XOR CO0.", "rule": { "op": "xor", "args": [{ "var": "i0" }, { "var": "carry_seed" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "sum1", "label": "Carry XOR output 1", "kind": "gate", "group": "carry_tile", "description": "O1 is S1 XOR the incoming CO0.", "rule": { "op": "xor", "args": [{ "var": "i1" }, { "var": "co0" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "sum2", "label": "Carry XOR output 2", "kind": "gate", "group": "carry_tile", "description": "O2 is S2 XOR the incoming CO1.", "rule": { "op": "xor", "args": [{ "var": "i2" }, { "var": "co1" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "sum3", "label": "Carry XOR output 3", "kind": "gate", "group": "carry_tile", "description": "O3 is S3 XOR the incoming CO2.", "rule": { "op": "xor", "args": [{ "var": "i3" }, { "var": "co2" }] }, "evidence": "open_source_implementation", "sourceRefs": ["yosys_cells"] },
+    { "id": "bitstream", "label": "Configuration loading", "kind": "boundary", "group": "configuration", "category": "memory", "scale": "chip", "evidence": "primary_published", "description": "A real FPGA is configured by vendor tooling and a device-specific configuration process.", "reason": "No bitstream parser, configuration transport, placement, or synthesis tool is run. LUT init in this JSON is an explicit logical configuration.", "sourceRefs": ["amd_artix", "yosys_cells"] },
+    { "id": "bram", "label": "Block RAM resources", "kind": "boundary", "group": "hard_blocks", "category": "memory", "scale": "chip", "evidence": "primary_published", "description": "The Artix 7 family includes block memory resources, with capacity determined by the selected device.", "reason": "No RAMB primitive, read-during-write policy, initialization image, or physical bank layout is executed.", "properties": [{ "name": "Selected SKU capacity", "value": null, "evidence": "unspecified", "sourceRefs": [] }], "sourceRefs": ["amd_artix"] },
+    { "id": "dsp", "label": "DSP resources", "kind": "boundary", "group": "hard_blocks", "category": "compute", "scale": "chip", "evidence": "primary_published", "description": "Dedicated DSP resources supplement programmable logic in the device family.", "reason": "DSP arithmetic, pipeline registers, mode controls, and resource counts are not modeled.", "sourceRefs": ["amd_artix"] },
+    { "id": "io_bank", "label": "I/O banks", "kind": "boundary", "group": "io", "category": "io", "scale": "package", "evidence": "primary_published", "description": "Device/package I/O is separate from ideal Boolean stimulus signals.", "reason": "No pin assignment, I/O standard, voltage, tri-state Z, or contention model is supplied.", "sourceRefs": ["amd_artix"] },
+    { "id": "clock_network", "label": "Clock distribution", "kind": "boundary", "group": "io", "category": "clock", "scale": "chip", "evidence": "open_source_implementation", "description": "Registers have clock inputs; the physical network distributing those clocks is outside the primitive contract.", "reason": "No PLL, clock routing, skew, generated clocks, or clock-domain crossing analysis is performed.", "sourceRefs": ["yosys_cells"] }
+  ],
+  "connections": [
+    { "id": "configure_lut", "from": "bitstream", "to": "lut_result", "kind": "configuration", "label": "LUT configuration context", "description": "Configuration bits define a LUT function; this link does not load the example table or animate configuration traffic.", "evidence": "primary_derived", "sourceRefs": ["yosys_cells"] },
+    { "id": "input_context", "from": "io_bank", "to": "i0", "kind": "data", "label": "Input boundary", "description": "Illustrative connection to the configured design, not a published Artix pin or routing assignment.", "evidence": "illustrative", "sourceRefs": ["amd_artix"] },
+    { "id": "output_context", "from": "routed_result", "to": "io_bank", "kind": "data", "label": "Output boundary", "description": "Ideal logical output enters an unmodeled physical I/O system.", "evidence": "illustrative", "sourceRefs": ["amd_artix"] },
+    { "id": "clock_context", "from": "clock_network", "to": "clk", "kind": "clock", "label": "Clock-tree boundary", "description": "The lab's clock input is external; no physical clock timing is synthesized.", "evidence": "illustrative", "sourceRefs": ["yosys_cells"] },
+    { "id": "fabric_bram", "from": "routed_result", "to": "bram", "kind": "data", "label": "Possible memory integration", "description": "Example design context only, not a live read/write port or a required connection.", "evidence": "illustrative", "sourceRefs": ["amd_artix"] },
+    { "id": "fabric_dsp", "from": "lut_result", "to": "dsp", "kind": "data", "label": "Possible DSP integration", "description": "Optional authored architectural relationship; it does not execute DSP operations.", "evidence": "illustrative", "sourceRefs": ["amd_artix"] }
+  ],
+  "outputs": [
+    { "id": "lut_output", "label": "LUT6 result", "signal": "lut_result", "description": "Result selected by the configured 64-bit truth table.", "sourceRefs": ["yosys_cells"] },
+    { "id": "register_output", "label": "Register stage 0", "signal": "q0", "description": "First rising-edge registered value.", "sourceRefs": ["yosys_cells"] },
+    { "id": "pipeline_output", "label": "Register stage 1", "signal": "q1", "description": "Second register, sampled from the prior stage on the same edge.", "sourceRefs": ["yosys_cells"] },
+    { "id": "route_output", "label": "Selected output route", "signal": "routed_result", "description": "Example mux output.", "sourceRefs": ["yosys_cells"] },
+    { "id": "carry_output", "label": "Final carry CO3", "signal": "co3", "description": "Four-stage functional carry result.", "sourceRefs": ["yosys_cells"] },
+    { "id": "sum_output", "label": "Carry XOR output O3", "signal": "sum3", "description": "High carry-XOR stage; remaining outputs are available in the inspector.", "sourceRefs": ["yosys_cells"] }
+  ],
+  "requirements": [
+    { "id": "lookup", "text": "The configured LUT returns INIT at the six-bit address with I0 least significant; the selected INIT implements parity.", "signals": ["lut_result"], "sourceRefs": ["yosys_cells"] },
+    { "id": "sequential", "text": "Rising edges sample data with CE; CE low holds state and synchronous reset overrides CE without acting asynchronously.", "signals": ["q0", "q1"], "sourceRefs": ["yosys_cells"] },
+    { "id": "route_selection", "text": "The example mux selects either q0 or the combinational LUT result as configured by the route input.", "signals": ["routed_result"], "sourceRefs": ["yosys_cells"] },
+    { "id": "carry_contract", "text": "Each carry stage selects its incoming carry when S is true or DI otherwise; XOR outputs use incoming carry.", "signals": ["co0", "co1", "co2", "co3", "sum0", "sum1", "sum2", "sum3"], "sourceRefs": ["yosys_cells"] }
+  ],
+  "vectors": [
+    { "id": "parity", "label": "LUT6 configured parity", "requirements": ["lookup"], "steps": [
+      { "set": {}, "expect": { "lut_result": false } },
+      { "set": { "i0": true }, "expect": { "lut_result": true } },
+      { "set": { "i5": true }, "expect": { "lut_result": false } },
+      { "set": { "i1": true, "i2": true, "i3": true }, "expect": { "lut_result": true } },
+      { "set": { "i4": true }, "expect": { "lut_result": false } }
+    ] },
+    { "id": "registers", "label": "Clock, enable, reset and pipeline", "requirements": ["sequential"], "steps": [
+      { "set": { "i0": true }, "expect": { "q0": false, "q1": false } },
+      { "set": { "clk": true }, "expect": { "q0": true, "q1": false } },
+      { "set": { "clk": false }, "expect": { "q0": true, "q1": false } },
+      { "set": { "clk": true }, "expect": { "q0": true, "q1": true } },
+      { "set": { "clk": false, "ce": false, "i0": false }, "expect": { "q0": true, "q1": true } },
+      { "set": { "clk": true }, "expect": { "q0": true, "q1": true } },
+      { "set": { "reset": true }, "expect": { "q0": true, "q1": true } },
+      { "set": { "clk": false }, "expect": { "q0": true, "q1": true } },
+      { "set": { "clk": true }, "expect": { "q0": false, "q1": false } }
+    ] },
+    { "id": "routes", "label": "Combinational or registered route", "requirements": ["route_selection"], "steps": [
+      { "set": { "i0": true, "registered_route": false }, "expect": { "routed_result": true } },
+      { "set": { "registered_route": true }, "expect": { "routed_result": false } },
+      { "set": { "clk": true }, "expect": { "routed_result": true } },
+      { "set": { "i0": false }, "expect": { "routed_result": true } },
+      { "set": { "registered_route": false }, "expect": { "routed_result": false } }
+    ] },
+    { "id": "carry", "label": "Carry propagation and generation", "requirements": ["carry_contract"], "steps": [
+      { "set": {}, "expect": { "co0": false, "co1": false, "co2": false, "co3": false, "sum0": false, "sum1": false, "sum2": false, "sum3": false } },
+      { "set": { "i0": true, "i1": true, "i2": true, "i3": true, "ci": true }, "expect": { "co0": true, "co1": true, "co2": true, "co3": true, "sum0": false, "sum1": false, "sum2": false, "sum3": false } },
+      { "set": { "ci": false, "cyinit": true }, "expect": { "co0": true, "co1": true, "co2": true, "co3": true, "sum0": false, "sum1": false, "sum2": false, "sum3": false } },
+      { "set": { "cyinit": false, "i0": false, "i1": false, "i2": false, "i3": false, "di0": true, "di2": true }, "expect": { "co0": true, "co1": false, "co2": true, "co3": false, "sum0": false, "sum1": true, "sum2": false, "sum3": true } }
+    ] }
+  ],
+  "assumptions": ["Positive-edge, non-inverted FDRE-style operation with INIT=0 is selected. Both registers share ideal clk, ce, and reset inputs.", "The LUT6 configuration and route mux are authored teaching-design choices, not fixed functions of an unconfigured FPGA.", "Functional primitive equations are checked against a fingerprinted open-source implementation, not against vendor simulation binaries.", "No exact Artix 7 SKU, package, resource inventory, or physical slice arrangement is selected."],
+  "omissions": ["HDL elaboration, synthesis, routing-bit generation, configuration loading, timing analysis, propagation delays, setup/hold checks, and metastability.", "BRAM/DSP arithmetic and port semantics, high-impedance Z, drive-strength/contention, PLLs, I/O voltages, and clock-domain crossing.", "This is a small configured network, not all resources in a CLB/slice, a full FPGA, or a substitute for a hardware design tool."]
+}

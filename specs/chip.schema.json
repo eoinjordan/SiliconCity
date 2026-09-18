@@ -1,0 +1,2379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "silicon-city/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "part": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "deviceClass": {
+      "default": "component",
+      "type": "string",
+      "enum": [
+        "component",
+        "cpu",
+        "mcu",
+        "mpu",
+        "npu",
+        "gpu",
+        "fpga",
+        "soc"
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "abstraction": {
+      "type": "string",
+      "enum": [
+        "boolean-functional",
+        "mixed-signal-behavioral",
+        "subsystem-contract"
+      ]
+    },
+    "sources": {
+      "minItems": 1,
+      "maxItems": 24,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "reviewed": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "publisher": {
+            "default": "Unspecified",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "type": {
+            "default": "unspecified",
+            "type": "string",
+            "enum": [
+              "datasheet",
+              "specification",
+              "manual",
+              "implementation",
+              "secondary",
+              "unspecified"
+            ]
+          },
+          "redistribution": {
+            "default": "link-only",
+            "type": "string",
+            "enum": [
+              "link-only",
+              "licensed",
+              "unspecified"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "url",
+          "revision",
+          "locator",
+          "reviewed",
+          "publisher",
+          "type",
+          "redistribution"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "groups": {
+      "minItems": 1,
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "parent": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "description"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "inputs": {
+      "minItems": 1,
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "boolean"
+              },
+              "default": {
+                "type": "boolean"
+              },
+              "pin": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "default"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "number"
+              },
+              "default": {
+                "type": "number"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "step": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "unit": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "integer": {
+                "default": false,
+                "type": "boolean"
+              },
+              "pin": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "default",
+              "min",
+              "max",
+              "step",
+              "unit",
+              "integer"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "blocks": {
+      "minItems": 1,
+      "maxItems": 128,
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "gate"
+              },
+              "rule": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "rule"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "lut"
+              },
+              "inputs": {
+                "minItems": 1,
+                "maxItems": 6,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "init": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 64,
+                "pattern": "^[01]+$"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "inputs",
+              "init"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "comparator"
+              },
+              "rule": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "rule"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "latch"
+              },
+              "initial": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "const": "X"
+                  }
+                ]
+              },
+              "rule": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "initial",
+              "rule"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "dff"
+              },
+              "initial": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string",
+                    "const": "X"
+                  }
+                ]
+              },
+              "clock": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "rule": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "initial",
+              "clock",
+              "rule"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "sourceRefs": {
+                "minItems": 1,
+                "maxItems": 16,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                }
+              },
+              "evidence": {
+                "default": "unspecified",
+                "type": "string",
+                "enum": [
+                  "primary_published",
+                  "primary_derived",
+                  "open_source_implementation",
+                  "secondary_inference",
+                  "illustrative",
+                  "unspecified"
+                ]
+              },
+              "category": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "compute",
+                  "memory",
+                  "interconnect",
+                  "dma",
+                  "clock",
+                  "power",
+                  "io",
+                  "security",
+                  "software",
+                  "package",
+                  "context"
+                ]
+              },
+              "scale": {
+                "default": "logic",
+                "type": "string",
+                "enum": [
+                  "logic",
+                  "execution",
+                  "chip",
+                  "package",
+                  "board",
+                  "system",
+                  "software"
+                ]
+              },
+              "properties": {
+                "default": [],
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "enum": [
+                        "primary_published",
+                        "primary_derived",
+                        "open_source_implementation",
+                        "secondary_inference",
+                        "illustrative",
+                        "unspecified"
+                      ]
+                    },
+                    "sourceRefs": {
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value",
+                    "evidence",
+                    "sourceRefs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "geometry": {
+                "default": {
+                  "kind": "logical",
+                  "evidence": "illustrative",
+                  "sourceRefs": []
+                },
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "logical",
+                      "package",
+                      "physical"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "enum": [
+                      "primary_published",
+                      "primary_derived",
+                      "open_source_implementation",
+                      "secondary_inference",
+                      "illustrative",
+                      "unspecified"
+                    ]
+                  },
+                  "sourceRefs": {
+                    "maxItems": 16,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    }
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "evidence",
+                  "sourceRefs"
+                ],
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string",
+                "const": "boundary"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "group",
+              "description",
+              "sourceRefs",
+              "evidence",
+              "category",
+              "scale",
+              "properties",
+              "geometry",
+              "kind",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "connections": {
+      "default": [],
+      "maxItems": 256,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "data",
+              "control",
+              "memory",
+              "clock",
+              "configuration"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "enum": [
+              "primary_published",
+              "primary_derived",
+              "open_source_implementation",
+              "secondary_inference",
+              "illustrative",
+              "unspecified"
+            ]
+          },
+          "sourceRefs": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "from",
+          "to",
+          "label",
+          "description",
+          "kind",
+          "evidence",
+          "sourceRefs"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "outputs": {
+      "minItems": 1,
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "signal": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "pin": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "sourceRefs": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "signal",
+          "description",
+          "sourceRefs"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "requirements": {
+      "maxItems": 128,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "signals": {
+            "minItems": 1,
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          },
+          "sourceRefs": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "signals",
+          "sourceRefs"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vectors": {
+      "maxItems": 512,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "requirements": {
+            "minItems": 1,
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          },
+          "steps": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "set": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                  },
+                  "additionalProperties": {
+                    "type": [
+                      "boolean",
+                      "number"
+                    ]
+                  }
+                },
+                "expect": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                  },
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "string",
+                            "const": "X"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "set",
+                "expect"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "requirements",
+          "steps"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "assumptions": {
+      "minItems": 1,
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    },
+    "omissions": {
+      "minItems": 1,
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    }
+  },
+  "required": [
+    "format",
+    "id",
+    "name",
+    "part",
+    "deviceClass",
+    "revision",
+    "summary",
+    "abstraction",
+    "sources",
+    "groups",
+    "inputs",
+    "blocks",
+    "connections",
+    "outputs",
+    "requirements",
+    "vectors",
+    "assumptions",
+    "omissions"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "var": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          },
+          "required": [
+            "var"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "not",
+                "and",
+                "or",
+                "xor",
+                "eq",
+                "ne",
+                "lt",
+                "le",
+                "gt",
+                "ge",
+                "if"
+              ]
+            },
+            "args": {
+              "minItems": 1,
+              "maxItems": 16,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/__schema0"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "args"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

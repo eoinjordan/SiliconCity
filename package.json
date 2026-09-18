@@ -35,15 +35,21 @@
     "test:app": "npm run build && TEST_APP=1 playwright test",
     "native:prepare": "node tools/model.mjs && npm run build",
     "runtime": "node --import tsx tools/runtime-server.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate:specs": "node --import tsx tools/validate-specs.ts",
+    "spec:schema": "node --import tsx tools/validate-specs.ts --schema",
+    "test:logic": "npm run build && TEST_LOGIC=1 playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@types/json-logic-js": "^2.0.8",
+    "@types/node": "^26.6.1",
     "@types/three": "^0.185.0",
     "c8": "^12.0.0",
     "jsdom": "^29.1.1",
     "onnx-proto": "^8.0.1",
     "onnxruntime-node": "^1.30.0",
+    "pngjs": "^7.0.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
@@ -54,9 +60,12 @@
     }
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.1.1",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
+    "json-logic-js": "^2.0.5",
     "lucide": "^1.47.0",
-    "three": "^0.185.0"
+    "three": "^0.185.0",
+    "zod": "^4.6.5"
   }
 }

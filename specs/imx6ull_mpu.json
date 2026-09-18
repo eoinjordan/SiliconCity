@@ -1,0 +1,91 @@
+{
+  "format": "silicon-city/v1", "id": "imx6ull_mpu", "name": "i.MX 6ULL MPU interrupt fabric",
+  "part": "NXP i.MX 6ULL / Cortex-A7", "deviceClass": "mpu", "revision": "GIC eligibility contract 1",
+  "summary": "Application-processor architecture with executable single-candidate GIC forwarding gates and priority-mask comparison. CPU, cache/MMU, DRAM, power, and peripheral subsystems remain documented architectural boundaries.",
+  "abstraction": "subsystem-contract",
+  "sources": [
+    { "id": "nxp_product", "title": "i.MX 6ULL applications processor", "url": "https://www.nxp.com/products/i.MX6ULL", "revision": "Product page reviewed 2026-09-18", "locator": "CPU Complex, Memory, Connectivity, and i.MX 6ULL Block Diagram", "reviewed": "2026-09-18", "publisher": "NXP", "type": "manual", "redistribution": "link-only" },
+    { "id": "nxp_base", "title": "NXP Linux i.MX 6UL shared device-tree description", "url": "https://raw.githubusercontent.com/nxp-imx/linux-imx/lf-6.6.y/arch/arm/boot/dts/nxp/imx/imx6ul.dtsi", "revision": "lf-6.6.y snapshot reviewed 2026-09-18", "locator": "cpu0, intc, gpc, ocram, AIPS buses and memory-controller nodes; inherited by imx6ull.dtsi", "reviewed": "2026-09-18", "publisher": "NXP", "type": "implementation", "redistribution": "link-only" },
+    { "id": "nxp_variant", "title": "NXP Linux i.MX 6ULL device-tree overrides", "url": "https://raw.githubusercontent.com/nxp-imx/linux-imx/lf-6.6.y/arch/arm/boot/dts/nxp/imx/imx6ull.dtsi", "revision": "lf-6.6.y snapshot reviewed 2026-09-18", "locator": "Includes imx6ul.dtsi; deletes CAAM; adds AIPS3 DCP/RNGB and overrides GPC", "reviewed": "2026-09-18", "publisher": "NXP", "type": "implementation", "redistribution": "link-only" },
+    { "id": "arm_gic", "title": "CMSIS Generic Interrupt Controller functions", "url": "https://arm-software.github.io/CMSIS_5/Core_A/html/group__GIC__functions.html", "revision": "CMSIS-Core A 1.2.1", "locator": "GIC_EnableDistributor, GIC_EnableInterface, GIC_EnableIRQ, GIC_SetTarget, GIC_SetInterfacePriorityMask and GIC_AcknowledgePending", "reviewed": "2026-09-18", "publisher": "Arm", "type": "manual", "redistribution": "link-only" }
+  ],
+  "groups": [
+    { "id": "gic", "label": "Generic Interrupt Controller", "description": "One eligible candidate and one CPU interface. This does not implement the whole GIC arbitration/state machine." },
+    { "id": "distributor", "label": "Distributor and target", "parent": "gic", "description": "Pending state, per-interrupt enable, group forwarding, and CPU target selection." },
+    { "id": "cpu_interface", "label": "CPU interface and priority", "parent": "gic", "description": "CPU-interface enable and effective priority-mask comparison. Remaining preemption/security qualifications are external." },
+    { "id": "application", "label": "Application CPU complex", "description": "Cortex-A7 and cache/MMU context, distinct from the MCU-oriented Cortex-M example." },
+    { "id": "memory", "label": "Memory subsystem", "description": "External-memory controller, system DRAM, and on-chip SRAM context." },
+    { "id": "io", "label": "Peripheral and security fabric", "description": "AIPS peripherals, DMA/I/O, and i.MX 6ULL-specific security context." },
+    { "id": "power", "label": "Clock and low-power control", "description": "GPC wakeup and clock/power management remain outside the executable GIC slice." }
+  ],
+  "inputs": [
+    { "id": "pending", "label": "Candidate pending", "kind": "boolean", "default": false, "group": "distributor", "description": "A pending interrupt candidate supplied by the surrounding GIC state. Edge capture and pending storage are not simulated.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "irq_enable", "label": "Interrupt enabled", "kind": "boolean", "default": true, "group": "distributor", "description": "Effective per-interrupt enable bit.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "target_cpu0", "label": "Targets CPU 0", "kind": "boolean", "default": true, "group": "distributor", "description": "The candidate's effective target includes this CPU interface.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "distributor_enable", "label": "Distributor forwarding", "kind": "boolean", "default": true, "group": "distributor", "description": "Effective forwarding enable for the represented interrupt group.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "interface_enable", "label": "CPU interface enabled", "kind": "boolean", "default": true, "group": "cpu_interface", "description": "Effective CPU-interface signaling enable for the represented interrupt group.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "other_checks", "label": "Other GIC checks pass", "kind": "boolean", "default": true, "group": "cpu_interface", "description": "External contract input covering running/group priority, active state, security grouping, and candidate selection. The model cannot derive these from the pending bit alone.", "evidence": "illustrative", "sourceRefs": ["arm_gic"] },
+    { "id": "priority", "label": "Effective IRQ priority", "kind": "number", "default": 64, "min": 0, "max": 255, "step": 1, "integer": true, "unit": "priority code", "group": "cpu_interface", "description": "Effective read-back priority code after implementation-specific unimplemented-bit handling. Lower numeric values mean higher priority.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "priority_mask", "label": "Effective priority mask", "kind": "number", "default": 128, "min": 0, "max": 255, "step": 1, "integer": true, "unit": "priority code", "group": "cpu_interface", "description": "Only a numerically lower candidate priority passes. Equality is blocked, not X.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] }
+  ],
+  "blocks": [
+    { "id": "candidate_enabled", "label": "Enabled pending candidate", "kind": "gate", "group": "distributor", "description": "Per-interrupt enable and pending status must both be present.", "rule": { "op": "and", "args": [{ "var": "pending" }, { "var": "irq_enable" }] }, "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "forwarded", "label": "Distributor forwarding", "kind": "gate", "group": "distributor", "description": "Forward this candidate only when the target CPU and distributor gate permit it.", "rule": { "op": "and", "args": [{ "var": "candidate_enabled" }, { "var": "target_cpu0" }, { "var": "distributor_enable" }] }, "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "priority_pass", "label": "Priority mask check", "kind": "gate", "group": "cpu_interface", "description": "A digital less-than comparison: IRQ priority must be strictly higher, meaning numerically lower, than PMR.", "rule": { "op": "lt", "args": [{ "var": "priority" }, { "var": "priority_mask" }] }, "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "irq_eligible", "label": "CPU signaling eligibility", "kind": "gate", "group": "cpu_interface", "description": "The represented candidate may be signaled under the supplied GIC qualifications. This does not execute an interrupt acknowledge or enter a CPU exception.", "rule": { "op": "and", "args": [{ "var": "forwarded" }, { "var": "interface_enable" }, { "var": "priority_pass" }, { "var": "other_checks" }] }, "evidence": "primary_derived", "sourceRefs": ["arm_gic"] },
+    { "id": "cortex_a7", "label": "Cortex-A7 application CPU", "kind": "boundary", "group": "application", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "The i.MX 6ULL has one Arm Cortex-A7 application core.", "reason": "No instruction execution, exception entry, operating system, or pipeline is emulated.", "properties": [{ "name": "Application cores", "value": 1, "evidence": "primary_published", "sourceRefs": ["nxp_product"] }], "sourceRefs": ["nxp_product"] },
+    { "id": "cache_mmu", "label": "Cache and MMU context", "kind": "boundary", "group": "application", "category": "memory", "scale": "execution", "evidence": "primary_published", "description": "Cache and virtual-memory context of the application processor. The public product page specifies 128 KB L2.", "reason": "No cache hits, page-table walks, translations, or coherency transactions are generated.", "properties": [{ "name": "L2 capacity", "value": 128, "unit": "KiB", "evidence": "primary_published", "sourceRefs": ["nxp_product"] }], "sourceRefs": ["nxp_product", "arm_gic"] },
+    { "id": "ddr_controller", "label": "External-memory controller", "kind": "boundary", "group": "memory", "category": "memory", "scale": "chip", "evidence": "primary_published", "description": "The processor supports a 16-bit LPDDR2 / DDR3 / DDR3L interface.", "reason": "No controller initialization, DRAM protocol, timing, or bandwidth model is provided.", "properties": [{ "name": "Documented memory bus", "value": 16, "unit": "bits", "evidence": "primary_published", "sourceRefs": ["nxp_product"] }], "sourceRefs": ["nxp_product"] },
+    { "id": "dram", "label": "Board DRAM", "kind": "boundary", "group": "memory", "category": "memory", "scale": "board", "evidence": "primary_derived", "description": "Board-provided external memory, not embedded Flash as on the MCU example.", "reason": "Size and memory part are unspecified because no board has been selected.", "properties": [{ "name": "Board capacity", "value": null, "evidence": "unspecified", "sourceRefs": [] }], "sourceRefs": ["nxp_product"] },
+    { "id": "ocram", "label": "On-chip SRAM", "kind": "boundary", "group": "memory", "category": "memory", "scale": "chip", "evidence": "open_source_implementation", "description": "On-chip SRAM appears in the NXP BSP memory map; reserved portions depend on firmware and power-management use.", "reason": "No SRAM contents, reserved-region policy, or physical floorplan is inferred from the device tree.", "sourceRefs": ["nxp_base", "nxp_variant"] },
+    { "id": "aips", "label": "AIPS peripheral fabric", "kind": "boundary", "group": "io", "category": "interconnect", "scale": "chip", "evidence": "open_source_implementation", "description": "BSP AIPS buses host serial I/O, timers, display, and other peripheral register ranges.", "reason": "Device-tree hierarchy is not a transistor-level interconnect netlist. No bus transaction is executed.", "sourceRefs": ["nxp_base", "nxp_variant"] },
+    { "id": "peripherals", "label": "GPIO / UART / DMA / display", "kind": "boundary", "group": "io", "category": "io", "scale": "chip", "evidence": "primary_published", "description": "Representative peripheral functions of the applications processor; pin/package/board configuration is separate.", "reason": "No peripheral engines, DMA transfers, framebuffers, or pin multiplexing are simulated.", "sourceRefs": ["nxp_product", "nxp_variant"] },
+    { "id": "security", "label": "DCP and security context", "kind": "boundary", "group": "io", "category": "security", "scale": "chip", "evidence": "open_source_implementation", "description": "The i.MX 6ULL BSP removes the i.MX 6UL CAAM node and adds DCP/RNGB context; the two variants must not be conflated.", "reason": "No cryptography, secure boot, security policy, or isolation guarantee is simulated.", "sourceRefs": ["nxp_variant"] },
+    { "id": "gpc", "label": "General power controller", "kind": "boundary", "group": "power", "category": "power", "scale": "chip", "evidence": "open_source_implementation", "description": "The NXP BSP routes wakeup/interrupt context through GPC toward the GIC.", "reason": "Wakeup routing, retention, low-power transitions, and clock domains are not executed.", "sourceRefs": ["nxp_base", "nxp_variant"] }
+  ],
+  "connections": [
+    { "id": "core_cache", "from": "cortex_a7", "to": "cache_mmu", "kind": "memory", "label": "Application memory hierarchy", "description": "Logical CPU/cache relationship, not a physical placement claim.", "evidence": "primary_derived", "sourceRefs": ["nxp_product"] },
+    { "id": "cache_ddr", "from": "cache_mmu", "to": "ddr_controller", "kind": "memory", "label": "External memory accesses", "description": "Aggregated architectural path with unspecified internal fabric.", "evidence": "primary_derived", "sourceRefs": ["nxp_product"] },
+    { "id": "ddr_board", "from": "ddr_controller", "to": "dram", "kind": "memory", "label": "Board memory interface", "description": "Physical board memory model and package wiring are not supplied.", "evidence": "primary_derived", "sourceRefs": ["nxp_product"] },
+    { "id": "core_sram", "from": "cortex_a7", "to": "ocram", "kind": "memory", "label": "On-chip working storage", "description": "BSP-mapped SRAM context.", "evidence": "open_source_implementation", "sourceRefs": ["nxp_base", "nxp_variant"] },
+    { "id": "core_io", "from": "cortex_a7", "to": "aips", "kind": "control", "label": "Peripheral register accesses", "description": "Logical register-programming relationship.", "evidence": "open_source_implementation", "sourceRefs": ["nxp_base", "nxp_variant"] },
+    { "id": "fabric_io", "from": "aips", "to": "peripherals", "kind": "control", "label": "Peripheral bus context", "description": "Aggregated peripheral group from the product/BSP descriptions.", "evidence": "primary_derived", "sourceRefs": ["nxp_product", "nxp_base"] },
+    { "id": "fabric_security", "from": "aips", "to": "security", "kind": "control", "label": "Security register context", "description": "DCP/RNGB nodes from the 6ULL-specific BSP description.", "evidence": "open_source_implementation", "sourceRefs": ["nxp_variant"] },
+    { "id": "io_wakeup", "from": "peripherals", "to": "gpc", "kind": "control", "label": "Wakeup/interrupt context", "description": "Structural relationship from the inherited interrupt-parent hierarchy.", "evidence": "open_source_implementation", "sourceRefs": ["nxp_base", "nxp_variant"] },
+    { "id": "gpc_gic", "from": "gpc", "to": "pending", "kind": "control", "label": "GIC pending boundary", "description": "Does not synthesize a pending bit; pending remains an external snapshot input.", "evidence": "primary_derived", "sourceRefs": ["nxp_base", "arm_gic"] },
+    { "id": "irq_cpu", "from": "irq_eligible", "to": "cortex_a7", "kind": "control", "label": "CPU signaling boundary", "description": "No IAR acknowledge, EOI, or exception entry is inferred.", "evidence": "primary_derived", "sourceRefs": ["arm_gic"] }
+  ],
+  "outputs": [
+    { "id": "forward_output", "label": "Candidate forwarded", "signal": "forwarded", "description": "Distributor/target qualification only.", "sourceRefs": ["arm_gic"] },
+    { "id": "priority_output", "label": "Priority passes mask", "signal": "priority_pass", "description": "Strict unsigned priority comparison.", "sourceRefs": ["arm_gic"] },
+    { "id": "irq_output", "label": "CPU signaling eligible", "signal": "irq_eligible", "description": "Under the explicitly supplied other GIC qualifications.", "sourceRefs": ["arm_gic"] }
+  ],
+  "requirements": [
+    { "id": "forwarding", "text": "Pending, per-interrupt enable, target selection, and distributor enable all gate forwarding.", "signals": ["forwarded"], "sourceRefs": ["arm_gic"] },
+    { "id": "priority_boundary", "text": "Only an effective numeric priority strictly below the effective PMR value passes; equality blocks.", "signals": ["priority_pass", "irq_eligible"], "sourceRefs": ["arm_gic"] },
+    { "id": "interface_gates", "text": "CPU-interface enable and all external preemption/security qualifications remain necessary for eligibility.", "signals": ["irq_eligible"], "sourceRefs": ["arm_gic"] }
+  ],
+  "vectors": [
+    { "id": "forward_gates", "label": "Distributor and targeting gates", "requirements": ["forwarding"], "steps": [
+      { "set": {}, "expect": { "forwarded": false } },
+      { "set": { "pending": true }, "expect": { "forwarded": true } },
+      { "set": { "irq_enable": false }, "expect": { "forwarded": false } },
+      { "set": { "irq_enable": true, "target_cpu0": false }, "expect": { "forwarded": false } },
+      { "set": { "target_cpu0": true, "distributor_enable": false }, "expect": { "forwarded": false } }
+    ] },
+    { "id": "priority_edges", "label": "Digital PMR boundary cases", "requirements": ["priority_boundary"], "steps": [
+      { "set": { "pending": true, "priority": 64, "priority_mask": 128 }, "expect": { "priority_pass": true, "irq_eligible": true } },
+      { "set": { "priority": 128 }, "expect": { "priority_pass": false, "irq_eligible": false } },
+      { "set": { "priority": 192 }, "expect": { "priority_pass": false, "irq_eligible": false } },
+      { "set": { "priority": 0, "priority_mask": 0 }, "expect": { "priority_pass": false, "irq_eligible": false } },
+      { "set": { "priority": 254, "priority_mask": 255 }, "expect": { "priority_pass": true, "irq_eligible": true } }
+    ] },
+    { "id": "interface_controls", "label": "CPU interface and preemption", "requirements": ["interface_gates"], "steps": [
+      { "set": { "pending": true, "interface_enable": false }, "expect": { "irq_eligible": false } },
+      { "set": { "interface_enable": true, "other_checks": false }, "expect": { "irq_eligible": false } },
+      { "set": { "other_checks": true }, "expect": { "irq_eligible": true } }
+    ] }
+  ],
+  "assumptions": ["One candidate is considered; other_checks represents all otherwise-unmodeled active/running priority, security, and arbitration decisions.", "Priority inputs are effective unsigned read-back values after implementation-specific priority-bit handling; arbitrary writes are not emulated.", "MPU denotes microprocessor/application processor here, not Arm's Memory Protection Unit acronym.", "Architectural relationships are logical product/BSP descriptions. They are not physical netlists or executed memory traffic."],
+  "omissions": ["Complete GIC active/pending state, IAR/EOIR side effects, security groups, running priority, CPU exception entry, and OS behavior.", "Instruction execution, caches, MMU/page tables, DDR timing, DMA, power management, and peripheral protocols.", "No exact package, speed grade, board memory size, physical placement, electrical timing, or full-chip conformance claim."]
+}

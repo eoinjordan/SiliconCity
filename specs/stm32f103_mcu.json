@@ -1,0 +1,89 @@
+{
+  "format": "silicon-city/v1", "id": "stm32f103_mcu", "name": "STM32F103 MCU interrupt path",
+  "part": "STMicroelectronics STM32F103C8", "deviceClass": "mcu", "revision": "EXTI eligibility contract 1",
+  "summary": "MCU subsystems around a Boolean EXTI line, independent interrupt/event masks, and Cortex-M configurable-interrupt eligibility. Register/status snapshots are inputs; firmware and the pending-bit state machine are not executed.",
+  "abstraction": "subsystem-contract",
+  "sources": [
+    { "id": "st_product", "title": "STM32F103C8 product specification", "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32f103c8.html", "revision": "Product page reviewed 2026-09-18", "locator": "Product overview and All features; C8 device identifier", "reviewed": "2026-09-18", "publisher": "STMicroelectronics", "type": "datasheet", "redistribution": "link-only" },
+    { "id": "st_exti", "title": "STM32F1 EXTI low-layer driver", "url": "https://raw.githubusercontent.com/STMicroelectronics/stm32f1xx-hal-driver/master/Inc/stm32f1xx_ll_exti.h", "revision": "Master snapshot reviewed 2026-09-18", "locator": "LL_EXTI_IsEnabledIT_0_31, IsEnabledEvent_0_31, IsEnabledRisingTrig_0_31, IsEnabledFallingTrig_0_31, IsActiveFlag_0_31", "reviewed": "2026-09-18", "publisher": "STMicroelectronics", "type": "implementation", "redistribution": "link-only", "sha256": "9f816072941e79763cbc048fe03bf803fd81bf0a0ade876d74a49be8620bfde5" },
+    { "id": "arm_masks", "title": "CMSIS Cortex-M Core Register Access", "url": "https://arm-software.github.io/CMSIS_5/Core/html/group__Core__Register__gr.html", "revision": "CMSIS-Core M 5.6.0", "locator": "__get_PRIMASK, __disable_irq, __get_BASEPRI", "reviewed": "2026-09-18", "publisher": "Arm", "type": "manual", "redistribution": "link-only" }
+  ],
+  "groups": [
+    { "id": "interrupt_path", "label": "EXTI and exception control", "description": "One external interrupt line and its mask/qualification logic, not all NVIC state." },
+    { "id": "edge_control", "label": "Edge selection", "parent": "interrupt_path", "description": "Rising/falling edge observations and their configured trigger enables." },
+    { "id": "mask_control", "label": "Interrupt and event masks", "parent": "interrupt_path", "description": "IMR and EMR are active-high enables. A pending-bit snapshot and an edge observation serve distinct paths." },
+    { "id": "core", "label": "Cortex-M3 core", "description": "Processor and configurable interrupt masking. Instruction execution is not modeled." },
+    { "id": "storage", "label": "Flash and SRAM", "description": "On-chip memory serving program and data accesses; contents and timing are outside this example." },
+    { "id": "peripherals", "label": "DMA and peripherals", "description": "The MCU's bus-connected I/O context, distinct from a general-purpose application processor." },
+    { "id": "clocking", "label": "Clock and reset", "description": "Published clock/reset management context; no clock tree or electrical reset simulation." }
+  ],
+  "inputs": [
+    { "id": "rising", "label": "Observed rising edge", "kind": "boolean", "default": false, "group": "edge_control", "description": "One observed edge event. It is not a sampled GPIO level or a persistent pending bit.", "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "falling", "label": "Observed falling edge", "kind": "boolean", "default": false, "group": "edge_control", "description": "Observed falling-edge event supplied by the environment.", "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "rtsr", "label": "RTSR rising enabled", "kind": "boolean", "default": true, "group": "edge_control", "description": "True enables rising-edge detection for the selected line.", "evidence": "open_source_implementation", "sourceRefs": ["st_exti"] },
+    { "id": "ftsr", "label": "FTSR falling enabled", "kind": "boolean", "default": false, "group": "edge_control", "description": "True enables falling-edge detection for this line.", "evidence": "open_source_implementation", "sourceRefs": ["st_exti"] },
+    { "id": "pending", "label": "PR pending snapshot", "kind": "boolean", "default": false, "group": "mask_control", "description": "Observed EXTI pending bit. Edge generation and write-one-to-clear races are deliberately not simulated.", "evidence": "open_source_implementation", "sourceRefs": ["st_exti"] },
+    { "id": "imr", "label": "IMR interrupt enabled", "kind": "boolean", "default": true, "group": "mask_control", "description": "IMR bit 1 unmasks/enables this interrupt request; zero masks it.", "evidence": "open_source_implementation", "sourceRefs": ["st_exti"] },
+    { "id": "emr", "label": "EMR event enabled", "kind": "boolean", "default": false, "group": "mask_control", "description": "EMR independently enables the event path.", "evidence": "open_source_implementation", "sourceRefs": ["st_exti"] },
+    { "id": "nvic_enabled", "label": "NVIC line enabled", "kind": "boolean", "default": true, "group": "core", "description": "Already-qualified NVIC enable state for the selected external interrupt.", "evidence": "primary_derived", "sourceRefs": ["st_product", "arm_masks"] },
+    { "id": "primask", "label": "PRIMASK blocks exceptions", "kind": "boolean", "default": false, "group": "core", "description": "True prevents configurable-priority exception activation. It does not clear pending state or mask NMI/HardFault.", "evidence": "primary_derived", "sourceRefs": ["arm_masks"] },
+    { "id": "priority_ok", "label": "Other priority checks pass", "kind": "boolean", "default": true, "group": "core", "description": "Contract input summarizing BASEPRI, FAULTMASK, active priority, and other eligibility conditions. No priority arbiter is implemented.", "evidence": "illustrative", "sourceRefs": ["arm_masks"] }
+  ],
+  "blocks": [
+    { "id": "rising_selected", "label": "Rising-edge qualification", "kind": "gate", "group": "edge_control", "description": "An observed rising edge is selected only when RTSR enables it.", "rule": { "op": "and", "args": [{ "var": "rising" }, { "var": "rtsr" }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "falling_selected", "label": "Falling-edge qualification", "kind": "gate", "group": "edge_control", "description": "An observed falling edge is selected only when FTSR enables it.", "rule": { "op": "and", "args": [{ "var": "falling" }, { "var": "ftsr" }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "edge_selected", "label": "Selected EXTI edge", "kind": "gate", "group": "edge_control", "description": "Either configured edge can activate the edge-event path. This output does not automatically update the supplied PR snapshot.", "rule": { "op": "or", "args": [{ "var": "rising_selected" }, { "var": "falling_selected" }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "irq_request", "label": "EXTI interrupt request", "kind": "gate", "group": "mask_control", "description": "Pending EXTI status contributes an interrupt request while IMR is enabled.", "rule": { "op": "and", "args": [{ "var": "pending" }, { "var": "imr" }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "event_request", "label": "EXTI event path", "kind": "gate", "group": "mask_control", "description": "EMR qualifies the selected edge independently of interrupt masking and PRIMASK. This is event eligibility, not a measured pulse waveform.", "rule": { "op": "and", "args": [{ "var": "edge_selected" }, { "var": "emr" }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti"] },
+    { "id": "exception_eligible", "label": "Exception eligibility", "kind": "gate", "group": "core", "description": "Eligibility under the supplied NVIC and priority assumptions. It is not proof that an ISR has been entered.", "rule": { "op": "and", "args": [{ "var": "irq_request" }, { "var": "nvic_enabled" }, { "var": "priority_ok" }, { "op": "not", "args": [{ "var": "primask" }] }] }, "evidence": "primary_derived", "sourceRefs": ["st_exti", "arm_masks"] },
+    { "id": "cortex_m3", "label": "Cortex-M3 CPU", "kind": "boundary", "group": "core", "category": "compute", "scale": "execution", "description": "The STM32F103C8 includes an Arm Cortex-M3 core.", "reason": "No Arm instruction execution, vector-table fetch, stacking, or interrupt entry cycles are implemented.", "evidence": "primary_published", "sourceRefs": ["st_product"], "properties": [{ "name": "CPU core", "value": "Arm Cortex-M3", "evidence": "primary_published", "sourceRefs": ["st_product"] }] },
+    { "id": "flash", "label": "On-chip Flash", "kind": "boundary", "group": "storage", "category": "memory", "scale": "chip", "description": "Program storage for the specific C8 variant, not the larger CB variant.", "reason": "Program contents, fetch timing, and Flash controller behavior are not modeled.", "evidence": "primary_published", "sourceRefs": ["st_product"], "properties": [{ "name": "C8 Flash capacity", "value": 64, "unit": "KiB", "evidence": "primary_published", "sourceRefs": ["st_product"] }] },
+    { "id": "sram", "label": "On-chip SRAM", "kind": "boundary", "group": "storage", "category": "memory", "scale": "chip", "description": "The medium-density device's working memory.", "reason": "No memory values, bus access timing, or aliasing are modeled.", "evidence": "primary_published", "sourceRefs": ["st_product"], "properties": [{ "name": "SRAM capacity", "value": 20, "unit": "KiB", "evidence": "primary_published", "sourceRefs": ["st_product"] }] },
+    { "id": "dma", "label": "DMA controller", "kind": "boundary", "group": "peripherals", "category": "dma", "scale": "chip", "description": "DMA supports transfers associated with timers, ADC, and serial peripherals.", "reason": "Channel state, requests, arbitration, and transfers are not executed.", "evidence": "primary_published", "sourceRefs": ["st_product"] },
+    { "id": "apb", "label": "APB peripheral buses", "kind": "boundary", "group": "peripherals", "category": "interconnect", "scale": "chip", "description": "Two APB buses connect the documented peripheral set.", "reason": "An aggregated logical bus relationship, not a cycle-accurate bus fabric.", "evidence": "primary_published", "sourceRefs": ["st_product"] },
+    { "id": "timers_adc_io", "label": "Timers / ADC / serial I/O", "kind": "boundary", "group": "peripherals", "category": "io", "scale": "chip", "description": "Representative timer, ADC, USB/CAN, and serial peripheral context; availability depends on the exact package/variant.", "reason": "No timer counters, ADC conversion, pin multiplexing, USB, or CAN state machines are executed.", "evidence": "primary_published", "sourceRefs": ["st_product"] },
+    { "id": "rcc", "label": "Clock and reset control", "kind": "boundary", "group": "clocking", "category": "clock", "scale": "chip", "description": "Oscillator, PLL, reset, and supply-management context.", "reason": "No frequency, power, PLL lock, or reset distribution behavior is simulated.", "evidence": "primary_published", "sourceRefs": ["st_product"] }
+  ],
+  "connections": [
+    { "id": "cpu_flash", "from": "cortex_m3", "to": "flash", "kind": "memory", "label": "Program access", "description": "Conceptual CPU program-memory relationship; no physical routing claim.", "evidence": "primary_derived", "sourceRefs": ["st_product"] },
+    { "id": "cpu_sram", "from": "cortex_m3", "to": "sram", "kind": "memory", "label": "Working data", "description": "Conceptual CPU data-memory access.", "evidence": "primary_derived", "sourceRefs": ["st_product"] },
+    { "id": "cpu_apb", "from": "cortex_m3", "to": "apb", "kind": "control", "label": "Peripheral programming", "description": "Aggregated register access through the MCU bus system.", "evidence": "primary_derived", "sourceRefs": ["st_product"] },
+    { "id": "apb_io", "from": "apb", "to": "timers_adc_io", "kind": "control", "label": "Peripheral register interface", "description": "Published APB-connected peripheral context.", "evidence": "primary_published", "sourceRefs": ["st_product"] },
+    { "id": "peripheral_dma", "from": "timers_adc_io", "to": "dma", "kind": "data", "label": "DMA-capable transfers", "description": "Only peripherals supporting DMA use this conceptual path.", "evidence": "primary_published", "sourceRefs": ["st_product"] },
+    { "id": "dma_memory", "from": "dma", "to": "sram", "kind": "memory", "label": "Memory transfer context", "description": "No buffer movement is executed by this architectural link.", "evidence": "primary_derived", "sourceRefs": ["st_product"] },
+    { "id": "eligible_core", "from": "exception_eligible", "to": "cortex_m3", "kind": "control", "label": "Exception entry boundary", "description": "Eligibility reaches the unmodeled CPU; it must not be animated as firmware execution.", "evidence": "primary_derived", "sourceRefs": ["arm_masks"] },
+    { "id": "clock_core", "from": "rcc", "to": "cortex_m3", "kind": "clock", "label": "Clock/reset context", "description": "No functional clock domain is generated by the lab.", "evidence": "primary_derived", "sourceRefs": ["st_product"] }
+  ],
+  "outputs": [
+    { "id": "edge_output", "label": "Edge selected", "signal": "edge_selected", "description": "Configured trigger condition.", "sourceRefs": ["st_exti"] },
+    { "id": "interrupt_output", "label": "EXTI IRQ request", "signal": "irq_request", "description": "Request before NVIC/core masking.", "sourceRefs": ["st_exti"] },
+    { "id": "event_output", "label": "EXTI event eligible", "signal": "event_request", "description": "Independent event path.", "sourceRefs": ["st_exti"] },
+    { "id": "core_output", "label": "Exception eligible", "signal": "exception_eligible", "description": "Not an executed ISR or latency measurement.", "sourceRefs": ["arm_masks"] }
+  ],
+  "requirements": [
+    { "id": "edge_selection", "text": "Rising and falling observations are independently qualified by RTSR and FTSR.", "signals": ["rising_selected", "falling_selected", "edge_selected"], "sourceRefs": ["st_exti"] },
+    { "id": "independent_masks", "text": "IMR qualifies pending interrupt status; EMR qualifies the edge-event path independently.", "signals": ["irq_request", "event_request"], "sourceRefs": ["st_exti"] },
+    { "id": "core_masking", "text": "PRIMASK, NVIC enable, and external priority qualification control eligibility without clearing supplied pending state.", "signals": ["exception_eligible", "pending"], "sourceRefs": ["arm_masks"] }
+  ],
+  "vectors": [
+    { "id": "edges", "label": "Configure rising and falling edges", "requirements": ["edge_selection"], "steps": [
+      { "set": { "rising": true }, "expect": { "rising_selected": true, "falling_selected": false, "edge_selected": true } },
+      { "set": { "rising": false, "falling": true }, "expect": { "rising_selected": false, "falling_selected": false, "edge_selected": false } },
+      { "set": { "ftsr": true }, "expect": { "rising_selected": false, "falling_selected": true, "edge_selected": true } }
+    ] },
+    { "id": "masks", "label": "Interrupt and event independence", "requirements": ["independent_masks"], "steps": [
+      { "set": { "pending": true, "rising": true }, "expect": { "irq_request": true, "event_request": false } },
+      { "set": { "imr": false, "emr": true }, "expect": { "irq_request": false, "event_request": true } },
+      { "set": { "rising": false }, "expect": { "irq_request": false, "event_request": false } }
+    ] },
+    { "id": "primask_cases", "label": "Masking does not clear pending", "requirements": ["core_masking"], "steps": [
+      { "set": { "pending": true }, "expect": { "exception_eligible": true, "pending": true } },
+      { "set": { "primask": true }, "expect": { "exception_eligible": false, "pending": true } },
+      { "set": { "primask": false, "nvic_enabled": false }, "expect": { "exception_eligible": false, "pending": true } },
+      { "set": { "nvic_enabled": true, "priority_ok": false }, "expect": { "exception_eligible": false, "pending": true } },
+      { "set": { "priority_ok": true }, "expect": { "exception_eligible": true, "pending": true } }
+    ] }
+  ],
+  "assumptions": ["One EXTI line, valid register snapshots, and stable core mask state are supplied externally.", "priority_ok summarizes conditions not represented by PRIMASK/NVIC enable; eligibility does not prove exception entry.", "An observed edge and a PR pending snapshot are distinct inputs. Simultaneous set/clear races and hardware edge capture are not inferred."],
+  "omissions": ["Firmware/Arm ISA execution, EXTI PR storage and write-one-to-clear races, NVIC active/pending arbitration, exception entry and return.", "Analog GPIO behavior, clock/reset timing, bus timing, power, complete DMA/peripheral state, electrical characteristics, and package pin mapping.", "This control slice and logical subsystem map do not establish STM32F103C8 full-device conformance."]
+}

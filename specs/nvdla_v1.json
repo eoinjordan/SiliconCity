@@ -1,0 +1,116 @@
+{
+  "format": "silicon-city/v1",
+  "id": "nvdla_v1",
+  "name": "NVDLA v1 control and datapath",
+  "part": "NVIDIA NVDLA v1 configurable IP",
+  "deviceClass": "npu",
+  "revision": "Control contract 1",
+  "summary": "An NPU architecture map with executable CSB acceptance, selected register-bank protection, and two interrupt mask lanes. The convolution, activation, pooling, and memory engines are documented architectural context, not a simulated neural network.",
+  "abstraction": "subsystem-contract",
+  "sources": [
+    { "id": "nvdla_arch", "title": "NVDLA Hardware Architectural Specification", "url": "https://nvdla.org/hw/v1/hwarch.html", "revision": "v1 web documentation", "locator": "Functional Description; Configuration space bus; Host interrupt; Ping-pong Synchronization Mechanism", "reviewed": "2026-09-18", "publisher": "NVIDIA", "type": "specification", "redistribution": "link-only" },
+    { "id": "nvdla_integration", "title": "NVDLA Integrator's Manual", "url": "https://nvdla.org/hw/v1/integration_guide.html", "revision": "v1 web documentation", "locator": "Hardware System Interface; Configuration Interface; Clock and reset interface", "reviewed": "2026-09-18", "publisher": "NVIDIA", "type": "manual", "redistribution": "link-only" }
+  ],
+  "groups": [
+    { "id": "control", "label": "Host and control", "description": "Low-bandwidth register programming and completion notification. Acceptance outputs describe the current sampling cycle, not an entire transaction history." },
+    { "id": "csb", "label": "CSB request channel", "parent": "control", "description": "Valid and ready jointly accept a request. Read and non-posted write requests require responses; posted writes do not." },
+    { "id": "banks", "label": "Ping-pong register banks", "parent": "control", "description": "PRODUCER selects a duplicated register bank; writes to an enabled bank are ignored. Enable-state snapshots are supplied as inputs." },
+    { "id": "interrupts", "label": "Completion interrupts", "parent": "control", "description": "Two representative status/mask lanes. All other interrupt status bits are assumed clear." },
+    { "id": "convolution", "label": "Convolution pipeline", "description": "Convolution DMA, buffer, sequencer, MAC array, and accumulator. Their arithmetic and scheduling are not executed in this model." },
+    { "id": "postprocessing", "label": "Post-processing engines", "description": "SDP activation and PDP pooling context. Optional engines and operating modes depend on the generated IP configuration." },
+    { "id": "memory", "label": "Memory interfaces", "description": "Main memory interface, external DRAM, and optional SRAM interface. Physical memory and bus timing are not modeled." }
+  ],
+  "inputs": [
+    { "id": "valid", "label": "CSB request valid", "kind": "boolean", "default": false, "group": "csb", "description": "Host presents a stable CSB request for the current sampling cycle.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "ready", "label": "CSB receiver ready", "kind": "boolean", "default": true, "group": "csb", "description": "Observed accelerator ready signal. Backpressure generation is external to this control contract.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "write", "label": "Write request", "kind": "boolean", "default": false, "group": "csb", "description": "CSB write flag; false denotes a read.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "nonposted", "label": "Non-posted write", "kind": "boolean", "default": false, "group": "csb", "description": "Request write completion for a write transaction. This field does not turn a read into a write.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "producer", "label": "PRODUCER selects bank 1", "kind": "boolean", "default": false, "group": "banks", "description": "Snapshot of the software-controlled register-bank selector.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "enable0", "label": "Bank 0 enabled", "kind": "boolean", "default": false, "group": "banks", "description": "Snapshot of bank 0 D_OP_ENABLE. Enabled means pending or executing, not necessarily currently running.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "enable1", "label": "Bank 1 enabled", "kind": "boolean", "default": false, "group": "banks", "description": "Snapshot of bank 1 D_OP_ENABLE. Hardware clearing and layer execution are outside this contract.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "status0", "label": "Interrupt status lane 0", "kind": "boolean", "default": false, "group": "interrupts", "description": "One representative GLB interrupt-status bit, provided by the surrounding accelerator.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "mask0", "label": "Mask interrupt lane 0", "kind": "boolean", "default": false, "group": "interrupts", "description": "True masks this status bit. NVDLA mask polarity is not STM32 IMR polarity.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "status1", "label": "Interrupt status lane 1", "kind": "boolean", "default": false, "group": "interrupts", "description": "A second representative GLB status bit. Other unrepresented bits are assumed zero.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "mask1", "label": "Mask interrupt lane 1", "kind": "boolean", "default": false, "group": "interrupts", "description": "True prevents this lane from asserting the host interrupt.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] }
+  ],
+  "blocks": [
+    { "id": "accepted", "label": "CSB acceptance", "kind": "gate", "group": "csb", "description": "A request transfers only when valid AND ready are asserted together.", "rule": { "op": "and", "args": [{ "var": "valid" }, { "var": "ready" }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "read_expected", "label": "Read response required", "kind": "gate", "group": "csb", "description": "An accepted read requires one ordered read response later. This is an obligation, not the response-valid signal.", "rule": { "op": "and", "args": [{ "var": "accepted" }, { "op": "not", "args": [{ "var": "write" }] }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "write_expected", "label": "Write completion required", "kind": "gate", "group": "csb", "description": "Only accepted non-posted writes request a write completion. No completion latency is invented.", "rule": { "op": "and", "args": [{ "var": "accepted" }, { "var": "write" }, { "var": "nonposted" }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "posted_write", "label": "Posted write accepted", "kind": "gate", "group": "csb", "description": "A posted write is accepted without a requested completion response.", "rule": { "op": "and", "args": [{ "var": "accepted" }, { "var": "write" }, { "op": "not", "args": [{ "var": "nonposted" }] }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "selected_enabled", "label": "Selected bank protected", "kind": "gate", "group": "banks", "description": "Choose the enable bit using PRODUCER, not the datapath CONSUMER pointer.", "rule": { "op": "if", "args": [{ "var": "producer" }, { "var": "enable1" }, { "var": "enable0" }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "write_allowed", "label": "Bank write allowed", "kind": "gate", "group": "banks", "description": "For a write addressed to this duplicated configuration bank, accept parameter changes only while that bank is disabled.", "rule": { "op": "and", "args": [{ "var": "accepted" }, { "var": "write" }, { "op": "not", "args": [{ "var": "selected_enabled" }] }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "write_ignored", "label": "Protected write ignored", "kind": "gate", "group": "banks", "description": "An enabled duplicated bank ignores writes even when the layer is only pending. This is not a bus-error or a missing-acknowledgement model.", "rule": { "op": "and", "args": [{ "var": "accepted" }, { "var": "write" }, { "var": "selected_enabled" }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "pending0", "label": "Unmasked status 0", "kind": "gate", "group": "interrupts", "description": "A status bit contributes to IRQ only if its mask bit is zero.", "rule": { "op": "and", "args": [{ "var": "status0" }, { "op": "not", "args": [{ "var": "mask0" }] }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "pending1", "label": "Unmasked status 1", "kind": "gate", "group": "interrupts", "description": "The independent second interrupt lane obeys the same mask polarity.", "rule": { "op": "and", "args": [{ "var": "status1" }, { "op": "not", "args": [{ "var": "mask1" }] }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "host_irq", "label": "Host interrupt", "kind": "gate", "group": "interrupts", "description": "OR of the two represented unmasked status bits. All other bits are assumed clear.", "rule": { "op": "or", "args": [{ "var": "pending0" }, { "var": "pending1" }] }, "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "cdma", "label": "Convolution DMA", "kind": "boundary", "group": "convolution", "category": "dma", "scale": "execution", "evidence": "primary_published", "description": "Fetches convolution features and weights via the memory system.", "reason": "No DMA addresses, transaction queues, or data values are executed.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "cbuf", "label": "Convolution buffer", "kind": "boundary", "group": "convolution", "category": "memory", "scale": "execution", "evidence": "primary_published", "description": "Local feature and weight storage shared by the convolution pipeline.", "reason": "Capacity and banking vary with the generated IP configuration; no capacity or storage contents are assumed.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "csc", "label": "Convolution sequencer", "kind": "boundary", "group": "convolution", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "Schedules convolution operands from the buffer toward MAC execution.", "reason": "Tensor shapes, scheduling, and layer dependency enforcement are not simulated.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "cmac", "label": "Convolution MAC array", "kind": "boundary", "group": "convolution", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "Configurable multiply-accumulate resources, shown as one aggregated architectural block.", "reason": "Not a fixed MAC count, precision support matrix, or executed convolution.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "cacc", "label": "Convolution accumulator", "kind": "boundary", "group": "convolution", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "Accumulates and prepares convolution results for subsequent processing.", "reason": "Accumulator widths, saturation, rounding, and arithmetic values are not modeled.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "sdp", "label": "SDP activation engine", "kind": "boundary", "group": "postprocessing", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "Single data point processing: activation, scaling, and element-wise operations where configured.", "reason": "The architecture is represented; no neural activation function is evaluated.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "pdp", "label": "PDP pooling engine", "kind": "boundary", "group": "postprocessing", "category": "compute", "scale": "execution", "evidence": "primary_published", "description": "Planar data processor for configured pooling operations.", "reason": "Availability depends on the generated configuration; no pooling result or throughput is produced.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "mcif", "label": "Main memory interface", "kind": "boundary", "group": "memory", "category": "interconnect", "scale": "chip", "evidence": "primary_published", "description": "NVDLA's main data interface connects to system memory through the SoC interconnect.", "reason": "Memory response ordering and AXI burst transactions are not executed here.", "sourceRefs": ["nvdla_integration"] },
+    { "id": "dram", "label": "System DRAM", "kind": "boundary", "group": "memory", "category": "memory", "scale": "system", "evidence": "primary_published", "description": "External system-context memory supplying weights, features, and outputs.", "reason": "Memory technology, size, latency, and bandwidth belong to the integrating SoC and remain unspecified.", "sourceRefs": ["nvdla_integration"] },
+    { "id": "sramif", "label": "Optional SRAM interface", "kind": "boundary", "group": "memory", "category": "interconnect", "scale": "chip", "evidence": "primary_published", "description": "An optional second memory interface for an integrating system's SRAM.", "reason": "Shown as optional capability, not a mandatory feature of every NVDLA build.", "sourceRefs": ["nvdla_integration"] }
+  ],
+  "connections": [
+    { "id": "program_layer", "from": "write_allowed", "to": "cdma", "kind": "configuration", "label": "Layer configuration", "description": "Logical software configuration relationship; does not start a simulated DMA.", "evidence": "primary_derived", "sourceRefs": ["nvdla_arch"] },
+    { "id": "memory_fetch", "from": "dram", "to": "mcif", "kind": "memory", "label": "System memory path", "description": "Conceptual data path through the main interface, not a sampled bus signal.", "evidence": "primary_published", "sourceRefs": ["nvdla_integration"] },
+    { "id": "dma_fetch", "from": "mcif", "to": "cdma", "kind": "memory", "label": "Feature and weight reads", "description": "The convolution DMA accesses memory through the memory subsystem.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "dma_buffer", "from": "cdma", "to": "cbuf", "kind": "data", "label": "Feature and weight buffers", "description": "First part of the documented convolution core pipeline.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "buffer_sequence", "from": "cbuf", "to": "csc", "kind": "data", "label": "Buffered operands", "description": "Logical operand flow from storage to the sequencer.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "sequence_mac", "from": "csc", "to": "cmac", "kind": "data", "label": "Scheduled operands", "description": "Logical flow in the documented convolution pipeline.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "mac_accumulate", "from": "cmac", "to": "cacc", "kind": "data", "label": "Partial products", "description": "Convolution MAC results feed accumulation.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "accumulate_activate", "from": "cacc", "to": "sdp", "kind": "data", "label": "Fused processing path", "description": "A possible fused path; independent mode instead uses memory traffic.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "activate_pool", "from": "sdp", "to": "pdp", "kind": "data", "label": "Optional fused pooling", "description": "Logical path when the corresponding engines and mode are enabled.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "pool_store", "from": "pdp", "to": "mcif", "kind": "memory", "label": "Output storage", "description": "Architectural store path, not a memory timing prediction.", "evidence": "primary_published", "sourceRefs": ["nvdla_arch"] },
+    { "id": "optional_sram", "from": "sramif", "to": "cdma", "kind": "memory", "label": "Optional SRAM access", "description": "Alternative data interface when generated and integrated.", "evidence": "primary_derived", "sourceRefs": ["nvdla_integration"] }
+  ],
+  "outputs": [
+    { "id": "accepted_output", "label": "Request accepted", "signal": "accepted", "description": "A transfer condition, not a completion response.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "read_response", "label": "Read response owed", "signal": "read_expected", "description": "Obligation arising from the current accepted request.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "write_response", "label": "Write completion owed", "signal": "write_expected", "description": "Non-posted write completion obligation.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "config_output", "label": "Bank write allowed", "signal": "write_allowed", "description": "Permission for the addressed duplicated register bank only.", "sourceRefs": ["nvdla_arch"] },
+    { "id": "irq_output", "label": "Host IRQ asserted", "signal": "host_irq", "description": "Two-lane mask reduction with all other status bits zero.", "sourceRefs": ["nvdla_arch"] }
+  ],
+  "requirements": [
+    { "id": "request_transfer", "text": "A request transfers exactly when valid and ready are both asserted.", "signals": ["accepted"], "sourceRefs": ["nvdla_arch"] },
+    { "id": "response_contract", "text": "Accepted reads and non-posted writes create separate response obligations; posted writes do not request completion.", "signals": ["read_expected", "write_expected", "posted_write"], "sourceRefs": ["nvdla_arch"] },
+    { "id": "bank_protection", "text": "An enabled duplicated bank ignores writes regardless of whether it is currently running or only pending.", "signals": ["selected_enabled", "write_allowed", "write_ignored"], "sourceRefs": ["nvdla_arch"] },
+    { "id": "irq_reduction", "text": "With other lanes clear, host interrupt is the OR of status AND NOT mask for the represented lanes.", "signals": ["pending0", "pending1", "host_irq"], "sourceRefs": ["nvdla_arch"] }
+  ],
+  "vectors": [
+    { "id": "csb_handshake", "label": "Request and response contract", "requirements": ["request_transfer", "response_contract"], "steps": [
+      { "set": {}, "expect": { "accepted": false, "read_expected": false, "write_expected": false, "posted_write": false } },
+      { "set": { "valid": true, "ready": false }, "expect": { "accepted": false, "read_expected": false, "write_expected": false, "posted_write": false } },
+      { "set": { "ready": true }, "expect": { "accepted": true, "read_expected": true, "write_expected": false, "posted_write": false } },
+      { "set": { "write": true }, "expect": { "accepted": true, "read_expected": false, "write_expected": false, "posted_write": true } },
+      { "set": { "nonposted": true }, "expect": { "accepted": true, "read_expected": false, "write_expected": true, "posted_write": false } }
+    ] },
+    { "id": "register_banks", "label": "Ping-pong write protection", "requirements": ["bank_protection"], "steps": [
+      { "set": { "valid": true, "write": true, "enable0": true }, "expect": { "selected_enabled": true, "write_allowed": false, "write_ignored": true } },
+      { "set": { "producer": true }, "expect": { "selected_enabled": false, "write_allowed": true, "write_ignored": false } },
+      { "set": { "enable1": true }, "expect": { "selected_enabled": true, "write_allowed": false, "write_ignored": true } },
+      { "set": { "write": false }, "expect": { "selected_enabled": true, "write_allowed": false, "write_ignored": false } }
+    ] },
+    { "id": "irq_masks", "label": "Independent completion masks", "requirements": ["irq_reduction"], "steps": [
+      { "set": { "status0": true }, "expect": { "pending0": true, "pending1": false, "host_irq": true } },
+      { "set": { "mask0": true }, "expect": { "pending0": false, "pending1": false, "host_irq": false } },
+      { "set": { "status1": true }, "expect": { "pending0": false, "pending1": true, "host_irq": true } },
+      { "set": { "mask1": true }, "expect": { "pending0": false, "pending1": false, "host_irq": false } }
+    ] }
+  ],
+  "assumptions": [
+    "Each input update represents stable interface/register snapshots at a sampling point; no CSB clocks, resets, or outstanding-response queue are emulated.",
+    "Bank protection applies to an addressed duplicated parameter bank. Address decode and all other CSB targets are outside this contract.",
+    "The two interrupt lanes are representative and unnamed; every other GLB status bit is zero.",
+    "Architectural connections show possible logical relationships, never live data. Optional SRAM and pooling capabilities are not guaranteed in every generated NVDLA configuration."
+  ],
+  "omissions": [
+    "Neural-network execution, MAC/accumulator arithmetic, quantization, tensor storage, scheduling, and performance.",
+    "Actual D_OP_ENABLE state transitions, clock-domain crossing, reset synchronization, all CSB addresses and response payloads, and complete interrupt state.",
+    "Full RTL equivalence, synthesis, place-and-route, physical floorplan, silicon validation, and SKU-specific counts."
+  ]
+}

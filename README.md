@@ -1,5 +1,62 @@
 # SiliconCity
 
+SiliconCity combines an architectural city with a source-linked **Logic Lab** for
+declarative chip and subsystem models. The existing Hexagon explorer remains at
+the site root; the new lab is [logic.html](logic.html), also linked from its toolbar.
+
+## Specification-Driven Logic Lab
+
+![Expanding 555 subsystems and local truth tables, then testing a NAND gate](docs/media/logic-lab.gif)
+
+- Expand and collapse subsystem diagrams, including nested groups.
+- Filter the reference catalog by device class, from discrete logic to FPGA.
+- Inspect equations, source references, evidence classifications, assumptions,
+  and explicitly unmodeled boundaries.
+- Expand local Boolean truth tables into components inside the logic diagram.
+- Change inputs, replay independent validation vectors, inspect event-step traces,
+  and import/export data-only JSON specifications.
+- Pulse explicit clocks and separate evaluated signals from source-linked
+  architectural connections that do not execute.
+- Use a shared Boolean/state engine and graph for both 3D and logic views.
+
+| Class | Reference example | Executable scope |
+| --- | --- | --- |
+| Component | TI NE555 | Nominal comparator, reset/trigger, and retained output logic |
+| Component | TI SN74HC00 | Four independent NAND gates |
+| CPU / ISA | Generic RV32I | BEQ/BNE decode and branch decision |
+| MCU | STM32F103C8 | EXTI selection, masks, and bounded exception eligibility |
+| MPU | NXP i.MX 6ULL | GIC forwarding and effective priority-mask comparison |
+| NPU | NVIDIA NVDLA v1 | CSB request/bank contracts and interrupt masking |
+| FPGA | AMD Artix 7 primitive network | LUT6, clock-enabled registers, carry chain, and example route mux |
+
+They are scoped functional abstractions, not electrical simulators or complete
+chip/ISA implementations. Larger models retain memory, compute, peripheral,
+configuration, and I/O context as explicitly unexecuted boundaries. FPGA
+primitive equations use a fingerprinted open-source implementation; no vendor
+bitstream or hardware timing is simulated. Unspecified startup state and
+unsupported behavior remain `X`. The requested `QC 477M` product identity has
+not been verified.
+
+```bash
+npm ci
+npm run dev
+# Open /logic.html on the printed local URL.
+npm run validate:specs
+npm run test:logic
+```
+
+Start with [AGENTS.md](AGENTS.md) to extend the atlas with an agent, and the
+[model authoring and verification guide](docs/logic-lab.md) for the schema,
+semantics, provenance rules, limitations, and validation workflow. The agent
+transcribes and verifies primary sources; the browser does not automatically
+convert a datasheet PDF into a proven chip implementation.
+
+The [cross-vendor roadmap](README.md.txt) guides future architecture work.
+Its complete vendor maps and physical floorplans are not implied by these
+bounded subsystem examples.
+
+## Hexagon Architecture City
+
 **Walk through the Qualcomm Hexagon NPU. Watch a tensor flow. Understand on-device AI.**
 
 An explorable 3D model where districts are the parts of the Hexagon™ NPU and

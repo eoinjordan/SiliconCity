@@ -5,6 +5,7 @@ import { fmtNum, hexCss } from '../core/util'
 import { PRECISIONS, WORKLOADS } from '../sim/model'
 import { DISTRICTS } from '../world/districts'
 import { clear, el } from './dom'
+import { createElement, Network } from 'lucide'
 
 export interface Hud {
   update(s: SimState): void
@@ -89,6 +90,11 @@ export function createHud(deps: HudDeps): Hud {
     tool('⚙', 'Settings — tune the figures', 'settings:toggle'),
     tool('⤓', 'Get the app — Android APK / Windows installer', 'getapp:toggle'),
   )
+  const logicLink = el('a', { class: 'tool', href: './logic.html', title: 'Open SiliconCity Logic Lab', 'aria-label': 'Open SiliconCity Logic Lab' }, [
+    createElement(Network, { width: '18', height: '18', 'aria-hidden': 'true' }),
+    el('small', { text: 'Logic Lab' }),
+  ])
+  left.append(logicLink)
 
   /* ---- right legend ---- */
   const legend = el('div', { class: 'card' }, [el('h3', { text: 'Districts' })])

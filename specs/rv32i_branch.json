@@ -1,0 +1,529 @@
+{
+  "format": "silicon-city/v1",
+  "id": "rv32i_branch",
+  "name": "RV32I branch-control slice",
+  "part": "Generic RV32I BEQ / BNE contract",
+  "deviceClass": "cpu",
+  "revision": "Subsystem model 1",
+  "summary": "A specification-backed BEQ/BNE decode and branch-decision slice. Other opcodes and branch forms route to an explicit unknown boundary; this is not a CPU or a Qualcomm chip model.",
+  "abstraction": "subsystem-contract",
+  "sources": [
+    {
+      "id": "rv_encodings",
+      "title": "RISC-V Unprivileged ISA instruction listings",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rv-32-64g.html",
+      "revision": "v20260120 / RV32I 2.1",
+      "locator": "Chapter 35.1, RV32I instruction table, BEQ and BNE rows",
+      "reviewed": "2026-09-18",
+      "publisher": "RISC-V International",
+      "type": "specification",
+      "redistribution": "link-only"
+    },
+    {
+      "id": "rv_branches",
+      "title": "RV32I base integer instruction set",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rv32.html",
+      "revision": "v20260120 / RV32I 2.1",
+      "locator": "Section 1.1.5.2 Conditional Branches",
+      "reviewed": "2026-09-18",
+      "publisher": "RISC-V International",
+      "type": "specification",
+      "redistribution": "link-only"
+    }
+  ],
+  "groups": [
+    {
+      "id": "decode",
+      "label": "Instruction decode",
+      "description": "Inputs are already-extracted instruction fields."
+    },
+    {
+      "id": "condition",
+      "label": "Branch condition",
+      "description": "Logical decisions for the two supported branch forms."
+    },
+    {
+      "id": "outside",
+      "label": "Unmodeled CPU context",
+      "description": "No hidden implementation is supplied for unsupported behavior."
+    }
+  ],
+  "inputs": [
+    {
+      "id": "opcode",
+      "label": "opcode [6:0]",
+      "kind": "number",
+      "default": 99,
+      "min": 0,
+      "max": 127,
+      "step": 1,
+      "integer": true,
+      "unit": "unsigned",
+      "group": "decode",
+      "description": "The 7-bit opcode. Decimal 99 is binary 1100011, the conditional-branch opcode.",
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "funct3",
+      "label": "funct3 [14:12]",
+      "kind": "number",
+      "default": 0,
+      "min": 0,
+      "max": 7,
+      "step": 1,
+      "integer": true,
+      "unit": "unsigned",
+      "group": "decode",
+      "description": "BEQ has funct3=000; BNE has funct3=001. Other forms are outside this example.",
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "operands_equal",
+      "label": "rs1 equals rs2",
+      "kind": "boolean",
+      "default": true,
+      "group": "condition",
+      "description": "Contract input representing equality of the two 32-bit register values. The register file and 32-bit comparator are not expanded here.",
+      "sourceRefs": [
+        "rv_branches"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": "branch_opcode",
+      "label": "Branch opcode",
+      "kind": "gate",
+      "group": "decode",
+      "description": "Decode the conditional-branch opcode 1100011.",
+      "rule": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "opcode"
+          },
+          99
+        ]
+      },
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "beq",
+      "label": "BEQ decode",
+      "kind": "gate",
+      "group": "decode",
+      "description": "Branch opcode and funct3=000 identify BEQ.",
+      "rule": {
+        "op": "and",
+        "args": [
+          {
+            "var": "branch_opcode"
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "funct3"
+              },
+              0
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "bne",
+      "label": "BNE decode",
+      "kind": "gate",
+      "group": "decode",
+      "description": "Branch opcode and funct3=001 identify BNE.",
+      "rule": {
+        "op": "and",
+        "args": [
+          {
+            "var": "branch_opcode"
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "funct3"
+              },
+              1
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "supported",
+      "label": "Modeled instruction",
+      "kind": "gate",
+      "group": "condition",
+      "description": "This is model coverage, not an ISA illegal-instruction signal.",
+      "rule": {
+        "op": "or",
+        "args": [
+          {
+            "var": "beq"
+          },
+          {
+            "var": "bne"
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_encodings"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "beq_taken",
+      "label": "BEQ condition",
+      "kind": "gate",
+      "group": "condition",
+      "description": "BEQ takes the branch when register operands are equal.",
+      "rule": {
+        "op": "and",
+        "args": [
+          {
+            "var": "beq"
+          },
+          {
+            "var": "operands_equal"
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_branches"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "bne_taken",
+      "label": "BNE condition",
+      "kind": "gate",
+      "group": "condition",
+      "description": "BNE takes the branch when register operands are unequal.",
+      "rule": {
+        "op": "and",
+        "args": [
+          {
+            "var": "bne"
+          },
+          {
+            "op": "not",
+            "args": [
+              {
+                "var": "operands_equal"
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_branches"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "other_behavior",
+      "label": "Unsupported instructions",
+      "kind": "boundary",
+      "group": "outside",
+      "description": "Behavior for all instructions other than the declared slice is not supplied.",
+      "reason": "No CPU, target-address generation, traps, prediction, execution pipeline, bus, or vendor peripheral model is present.",
+      "sourceRefs": [
+        "rv_branches"
+      ],
+      "evidence": "unspecified",
+      "category": "context",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "take_branch",
+      "label": "Branch decision",
+      "kind": "gate",
+      "group": "condition",
+      "description": "Return the modeled decision only for a supported instruction; otherwise X. The gate decomposition is illustrative, not an ISA-mandated microarchitecture.",
+      "rule": {
+        "op": "if",
+        "args": [
+          {
+            "var": "supported"
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "var": "beq_taken"
+              },
+              {
+                "var": "bne_taken"
+              }
+            ]
+          },
+          {
+            "var": "other_behavior"
+          }
+        ]
+      },
+      "sourceRefs": [
+        "rv_branches"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "outputs": [
+    {
+      "id": "covered_output",
+      "label": "Inside modeled scope",
+      "signal": "supported",
+      "description": "True only for BEQ/BNE encodings.",
+      "sourceRefs": [
+        "rv_encodings"
+      ]
+    },
+    {
+      "id": "taken_output",
+      "label": "Take branch",
+      "signal": "take_branch",
+      "description": "Branch direction for the supported slice; unknown outside it.",
+      "sourceRefs": [
+        "rv_branches"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "beq_behavior",
+      "text": "BEQ opcode=99, funct3=0 branches exactly when operands are equal.",
+      "signals": [
+        "beq",
+        "take_branch"
+      ],
+      "sourceRefs": [
+        "rv_encodings",
+        "rv_branches"
+      ]
+    },
+    {
+      "id": "bne_behavior",
+      "text": "BNE opcode=99, funct3=1 branches exactly when operands are unequal.",
+      "signals": [
+        "bne",
+        "take_branch"
+      ],
+      "sourceRefs": [
+        "rv_encodings",
+        "rv_branches"
+      ]
+    },
+    {
+      "id": "scope_guard",
+      "text": "Model policy: all other encodings are outside scope, not silently treated as not-taken.",
+      "signals": [
+        "supported",
+        "take_branch"
+      ],
+      "sourceRefs": [
+        "rv_encodings"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "id": "beq_cases",
+      "label": "BEQ equal and unequal",
+      "requirements": [
+        "beq_behavior"
+      ],
+      "steps": [
+        {
+          "set": {},
+          "expect": {
+            "beq": true,
+            "take_branch": true
+          }
+        },
+        {
+          "set": {
+            "operands_equal": false
+          },
+          "expect": {
+            "beq": true,
+            "take_branch": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "bne_cases",
+      "label": "BNE equal and unequal",
+      "requirements": [
+        "bne_behavior"
+      ],
+      "steps": [
+        {
+          "set": {
+            "funct3": 1
+          },
+          "expect": {
+            "bne": true,
+            "take_branch": false
+          }
+        },
+        {
+          "set": {
+            "operands_equal": false
+          },
+          "expect": {
+            "bne": true,
+            "take_branch": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "outside_scope",
+      "label": "Unsupported branch and opcode",
+      "requirements": [
+        "scope_guard"
+      ],
+      "steps": [
+        {
+          "set": {
+            "funct3": 4
+          },
+          "expect": {
+            "supported": false,
+            "take_branch": "X"
+          }
+        },
+        {
+          "set": {
+            "opcode": 19,
+            "funct3": 0
+          },
+          "expect": {
+            "supported": false,
+            "take_branch": "X"
+          }
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Instruction fields and register-equality information are valid contract inputs.",
+    "Zero-delay Boolean decisions after each input update. Gate layout is an explanatory realization, not a vendor netlist."
+  ],
+  "omissions": [
+    "All other RV32I instructions and all ISA extensions; this is not an ISA-conformant emulator.",
+    "Register-file and ALU implementation, instruction fetch, branch targets, alignment exceptions, memory, caches, prediction, clocks, and pipelines.",
+    "No Qualcomm product identity is asserted. The requested QC 477M identifier remains unverified; a specific SoC needs its exact part number, reference manual, and separately validated subsystem contracts."
+  ]
+}

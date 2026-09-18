@@ -1,0 +1,233 @@
+import { test, expect } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+import { PNG } from 'pngjs'
+import { createHash } from 'node:crypto'
+
+const fixture = JSON.parse(await readFile(new URL('../../specs/ne555.json', import.meta.url), 'utf8'))
+
+async function expectCityPixels(page) {
+  const pixels = PNG.sync.read(await page.locator('#city-view > canvas').screenshot({ style: '.city-labels, .drawing-tools, .signal-legend { visibility: hidden !important; }' }))
+  const colors = new Set()
+  let varied = 0
+  for (let index = 0; index < pixels.data.length; index += 64) {
+    const [red, green, blue] = pixels.data.subarray(index, index + 3)
+    colors.add(`${red >> 4},${green >> 4},${blue >> 4}`)
+    if (Math.max(red, green, blue) - Math.min(red, green, blue) > 25) varied += 1
+  }
+  expect(colors.size).toBeGreaterThan(30)
+  expect(varied).toBeGreaterThan(60)
+}
+
+test.beforeEach(async ({ page }) => {
+  const errors = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('response', (response) => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`) })
+  page.integrationErrors = errors
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('logic.html')
+  await expect(page.locator('#city-view')).toHaveAttribute('data-rendered', 'true')
+})
+test.afterEach(async ({ page }) => { expect(page.integrationErrors).toEqual([]) })
+
+test('city renders a framed graph with a readable responsive interface', async ({ page }, testInfo) => {
+  await expectCityPixels(page)
+  const count = await page.locator('#city-view').getAttribute('data-nodes')
+  await expect(page.locator('#city-view')).toHaveAttribute('data-framed', count)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await expect(page.locator('#check-count')).toHaveText('22 / 22')
+  await expect(page.locator('#coverage-count')).toHaveText('5 / 5')
+  await page.screenshot({ path: testInfo.outputPath('logic-city.png'), fullPage: true })
+})
+
+test('555 reset, trigger priority, and state retention drive real outputs', async ({ page }) => {
+  const output = page.locator('[data-output="out_pin"] strong')
+  const discharge = page.locator('[data-output="discharge_switch"] strong')
+  const capture = async () => createHash('sha256').update(await page.locator('#city-view > canvas').screenshot({ style: '.city-labels, .drawing-tools, .signal-legend { visibility: hidden !important; }' })).digest('hex')
+  const unknownFrame = await capture()
+  await expect(output).toHaveText('X')
+  await page.locator('#input-reset_n').uncheck()
+  await expect(output).toHaveText('0'); await expect(discharge).toHaveText('1')
+  expect(await capture()).not.toBe(unknownFrame)
+  await page.locator('#input-trigger').fill('0.1'); await page.locator('#input-trigger').press('Tab')
+  await page.locator('#input-threshold').fill('0.9'); await page.locator('#input-threshold').press('Tab')
+  await expect(output).toHaveText('0')
+  await page.locator('#input-reset_n').check()
+  await expect(output).toHaveText('1'); await expect(discharge).toHaveText('0')
+  await page.locator('#vector').selectOption('1')
+  await page.locator('#next-step').click(); await page.locator('#next-step').click()
+  await expect(output).toHaveText('1'); await expect(page.locator('#step-count')).toHaveText('2')
+  await page.locator('#reset').click(); await expect(output).toHaveText('X')
+})
+
+test('subsystems expand and truth tables become inline logic components', async ({ page }, testInfo) => {
+  await page.locator('[data-view="logic"]').click()
+  await page.locator('#collapse-all').click()
+  await expect(page.locator('.logic-node')).toHaveCount(7)
+  await page.locator('[data-group="comparators"]').click()
+  await expect(page.locator('.logic-node[data-node="trigger_low"]')).toBeVisible()
+  await expect(page.locator('.logic-node')).toHaveCount(8)
+  await page.locator('#expand-all').click()
+  await expect(page.locator('.logic-node')).toHaveCount(12)
+  await page.locator('[data-inspect="latch_q"]').click()
+  await page.locator('#inspector summary').click()
+  await expect(page.locator('#inspector .truth-table tbody tr')).toHaveCount(16)
+  await page.getByRole('button', { name: 'Expand table in diagram' }).click()
+  await expect(page.locator('.logic-node[data-node="latch_q"] .truth-table tbody tr')).toHaveCount(16)
+  await page.screenshot({ path: testInfo.outputPath('inline-truth-table.png'), fullPage: true })
+  await page.locator('#device').selectOption('sn74hc00')
+  await page.locator('[data-inspect="y1"]').click()
+  await page.getByRole('button', { name: 'Expand table in diagram' }).click()
+  await expect(page.locator('.logic-node[data-node="y1"] .truth-table tbody tr')).toHaveCount(4)
+  await page.locator('#input-a1').check(); await page.locator('#input-b1').check()
+  await expect(page.locator('[data-output="out1"] strong')).toHaveText('0')
+  await expect(page.locator('[data-output="out2"] strong')).toHaveText('1')
+})
+
+test('unsupported behavior remains unknown and evidence is visible', async ({ page }) => {
+  await page.locator('#device').selectOption('rv32i_branch')
+  await page.locator('#input-funct3').fill('4'); await page.locator('#input-funct3').press('Tab')
+  await expect(page.locator('[data-output="taken_output"] strong')).toHaveText('X')
+  await expect(page.locator('[data-output="covered_output"] strong')).toHaveText('0')
+  await page.getByRole('tab', { name: 'Evidence', exact: true }).click()
+  await expect(page.locator('#sources')).toContainText('RISC-V International')
+  await expect(page.locator('#omissions')).toContainText('not an ISA-conformant emulator')
+  await page.locator('#tab-evidence').focus(); await page.keyboard.press('Home')
+  await expect(page.locator('#tab-inspect')).toBeFocused()
+  await page.locator('[data-inspect="other_behavior"]').click()
+  await expect(page.locator('#inspector')).toContainText('Unspecified')
+  await expect(page.locator('#inspector')).toContainText('No CPU')
+})
+
+test('data-only imports cannot inject markup or corrupt the active model', async ({ page }) => {
+  await expect(page.getByRole('button', { name: 'Import spec', exact: true })).toBeVisible()
+  const imported = structuredClone(fixture)
+  imported.id = 'custom_timer'; imported.name = '<img src=x onerror=alert(1)>'
+  await page.locator('#spec-file').setInputFiles({ name: 'custom.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) })
+  await expect(page.locator('#model-name')).toHaveText(imported.name)
+  await expect(page.locator('#model-name img')).toHaveCount(0)
+  await expect(page.locator('#check-count')).toHaveText('22 / 22')
+  const invalid = structuredClone(fixture); invalid.blocks[0].rule = { op: 'execute_javascript', args: [true] }
+  await page.locator('#spec-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(invalid)) })
+  await expect(page.locator('#import-error')).toBeVisible()
+  await expect(page.locator('#model-name')).toHaveText(imported.name)
+  await page.locator('#spec-file').setInputFiles({ name: 'large.json', mimeType: 'application/json', buffer: Buffer.from(' '.repeat(262145)) })
+  await expect(page.locator('#import-error')).toContainText('exceeds 256 KiB')
+  await page.locator('#device').selectOption('ne555')
+  await expect(page.locator('#import-error')).toBeHidden()
+})
+
+test('tours, exported reports, and explicit failing-vector states work', async ({ page }) => {
+  await page.locator('#tour-start').click()
+  await expect(page.locator('#tour')).toBeVisible()
+  await page.locator('#tour-next').click(); await expect(page.locator('#tour-title')).toHaveText('Threshold comparators')
+  await page.keyboard.press('Escape'); await expect(page.locator('#tour')).toBeHidden()
+  await page.getByRole('tab', { name: 'Validation', exact: true }).click()
+  const downloaded = page.waitForEvent('download'); await page.locator('#download-report').click()
+  const artifact = await downloaded
+  const report = JSON.parse(await readFile(await artifact.path(), 'utf8'))
+  expect(report.kind).toBe('declared-functional-vector-report')
+  expect(report.status).toBe('pass'); expect(report.checks).toHaveLength(22)
+  expect(report.omissions.length).toBeGreaterThan(0)
+  const incorrect = structuredClone(fixture); incorrect.vectors[0].steps[0].expect.out_high = true
+  await page.locator('#spec-file').setInputFiles({ name: 'wrong-vector.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(incorrect)) })
+  await expect(page.locator('#check-count')).toHaveAttribute('data-result', 'fail')
+})
+
+test('MCU, MPU, NPU and FPGA classes expose distinct hierarchies and non-executing architecture links', async ({ page }, testInfo) => {
+  for (const [family, id] of [['mcu', 'stm32f103_mcu'], ['mpu', 'imx6ull_mpu'], ['npu', 'nvdla_v1'], ['fpga', 'artix7_fpga']]) {
+    await page.locator('#device-class').selectOption(family)
+    await expect(page.locator('#device')).toHaveValue(id)
+    await expect(page.locator('#logic-app')).toHaveAttribute('data-device-class', family)
+    await expect(page.locator('#check-count')).toHaveAttribute('data-result', 'pass')
+    await expect(page.locator('#step-count')).toHaveText('0')
+    await expect(page.locator('#abstraction')).toContainText('architecture boundaries')
+    const nodes = await page.locator('#city-view').getAttribute('data-nodes')
+    await expect(page.locator('#city-view')).toHaveAttribute('data-framed', nodes)
+    await expectCityPixels(page)
+    const labels = await page.locator('.city-label').evaluateAll((elements) => elements.filter((element) => element.checkVisibility()).map((element) => element.getBoundingClientRect().toJSON()))
+    expect(labels.length).toBeGreaterThan(0)
+    for (const [index, first] of labels.entries()) for (const second of labels.slice(index + 1)) {
+      expect(first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top).toBe(false)
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.locator('#city-view > canvas').screenshot({ path: testInfo.outputPath(`${family}-city.png`) })
+    await page.locator('#inputs input[type="checkbox"]').first().check()
+    const step = await page.locator('#step-count').textContent()
+    const outputs = await page.locator('.output-row strong').allTextContents()
+    const model = JSON.parse(await readFile(new URL(`../../specs/${id}.json`, import.meta.url), 'utf8'))
+    const boundary = model.blocks.find((block) => block.kind === 'boundary' && model.connections.some((link) => link.from === block.id || link.to === block.id))
+    await page.locator(`[data-inspect="${boundary.id}"]`).click()
+    await expect(page.locator('#inspector')).toContainText('Architecture evidence')
+    await expect(page.locator('#inspector .inspection-values strong')).toHaveText('X')
+    await page.locator('#inspector .architecture-context summary').click()
+    await expect(page.locator('#inspector .architecture-context a').first()).toHaveAttribute('href', /^https:/)
+    await page.locator('[data-view="logic"]').click()
+    const paths = page.locator('.logic-canvas path[data-kind="architecture"]')
+    expect(await paths.count()).toBeGreaterThan(0)
+    await expect(paths.first()).toHaveAttribute('stroke-dasharray', '2 5')
+    await page.locator('#collapse-all').click()
+    await page.locator('[data-view="city"]').click()
+    await expect(page.locator('#step-count')).toHaveText(step)
+    expect(await page.locator('.output-row strong').allTextContents()).toEqual(outputs)
+  }
+})
+
+test('complex device controls keep mask polarity, priority comparison and FPGA state correct', async ({ page }, testInfo) => {
+  await page.locator('#device-class').selectOption('mcu')
+  await page.locator('#input-pending').check()
+  await expect(page.locator('[data-output="core_output"] strong')).toHaveText('1')
+  await page.locator('#input-primask').check()
+  await expect(page.locator('[data-output="core_output"] strong')).toHaveText('0')
+  await expect(page.locator('#input-pending')).toBeChecked()
+  await page.locator('#device-class').selectOption('mpu')
+  await page.locator('#input-pending').check()
+  await page.locator('#input-priority').fill('128'); await page.locator('#input-priority').press('Tab')
+  await expect(page.locator('[data-output="priority_output"] strong')).toHaveText('0')
+  await page.locator('#device-class').selectOption('npu')
+  await page.locator('#input-status0').check()
+  await expect(page.locator('[data-output="irq_output"] strong')).toHaveText('1')
+  await page.locator('#input-mask0').check()
+  await expect(page.locator('[data-output="irq_output"] strong')).toHaveText('0')
+  await page.locator('#device-class').selectOption('fpga')
+  await page.locator('#input-i0').check()
+  await expect(page.locator('[data-output="lut_output"] strong')).toHaveText('1')
+  await expect(page.locator('[data-output="register_output"] strong')).toHaveText('0')
+  await page.locator('[data-clock="clk"]').click()
+  await expect(page.locator('[data-output="register_output"] strong')).toHaveText('1')
+  await expect(page.locator('[data-output="pipeline_output"] strong')).toHaveText('0')
+  await page.locator('[data-clock="clk"]').click()
+  await expect(page.locator('[data-output="pipeline_output"] strong')).toHaveText('1')
+  await page.locator('[data-inspect="lut_result"]').click()
+  await expect(page.locator('#inspector')).toContainText('0x6996966996696996')
+  await page.getByRole('button', { name: 'Expand table in diagram' }).click()
+  await expect(page.locator('.logic-node[data-node="lut_result"] .truth-table tbody tr')).toHaveCount(64)
+  const viewport = page.viewportSize()
+  await page.setViewportSize({ width: viewport.width, height: viewport.height + 20 })
+  await page.evaluate(async () => {
+    await new Promise(requestAnimationFrame)
+    await new Promise(requestAnimationFrame)
+  })
+  expect((await page.locator('.logic-node[data-node="lut_result"]').boundingBox()).width).toBeGreaterThan(180)
+  const tableScroll = await page.locator('.logic-node[data-node="lut_result"] .truth-table').evaluate((table) => {
+    table.scrollTop = table.scrollHeight
+    return table.scrollTop
+  })
+  expect(tableScroll).toBeGreaterThan(0)
+  await page.locator('.logic-node[data-node="lut_result"] .truth-table').evaluate((table) => { table.scrollTop = 0 })
+  if (testInfo.project.name === 'mobile') {
+    expect(await page.locator('.tabs').evaluate((tabs) => getComputedStyle(tabs).position)).toBe('static')
+    const tabs = await page.locator('.tabs').boundingBox()
+    const inspector = await page.locator('#inspector').boundingBox()
+    expect(inspector.y).toBeGreaterThanOrEqual(tabs.y + tabs.height)
+  }
+  await page.locator('.drawing-area').screenshot({ path: testInfo.outputPath('fpga-lut-focus.png') })
+  await page.screenshot({ path: testInfo.outputPath('fpga-lut-table.png'), fullPage: true })
+  await page.locator('#input-ce').uncheck(); await page.locator('#input-reset').check()
+  await expect(page.locator('[data-output="register_output"] strong')).toHaveText('1')
+  await page.locator('[data-clock="clk"]').click()
+  await expect(page.locator('[data-output="register_output"] strong')).toHaveText('0')
+  await page.locator('#device-class').selectOption('all')
+  await expect(page.locator('#device')).toHaveValue('artix7_fpga')
+  await page.locator('#device').selectOption('ne555')
+  await expect(page.locator('[data-output="out_pin"] strong')).toHaveText('X')
+})

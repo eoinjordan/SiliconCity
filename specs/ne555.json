@@ -1,0 +1,548 @@
+{
+  "format": "silicon-city/v1",
+  "id": "ne555",
+  "name": "NE555 precision timer",
+  "part": "Texas Instruments NE555",
+  "revision": "Behavioral model 1",
+  "summary": "Nominal trigger/threshold comparators, reset-dominant state, output logic, and discharge-switch control. The external RC circuit is an explicit unsupported boundary.",
+  "abstraction": "mixed-signal-behavioral",
+  "sources": [
+    {
+      "id": "ti_555",
+      "title": "TI xx555 Precision Timers",
+      "url": "https://www.ti.com/lit/gpn/NE555",
+      "revision": "SLFS022K, March 2026",
+      "locator": "Section 6.4, Table 6-1, page 13; functional description and application boundaries in sections 6-7",
+      "reviewed": "2026-09-18",
+      "sha256": "01e48b5721aab987745a8be0b7a303e75aa0f6d1d16c60666d75a0bbbb968d95",
+      "publisher": "Texas Instruments",
+      "type": "datasheet",
+      "redistribution": "link-only"
+    }
+  ],
+  "groups": [
+    {
+      "id": "pins",
+      "label": "Control inputs",
+      "description": "Normalized external control signals; the supply is assumed valid and constant."
+    },
+    {
+      "id": "comparators",
+      "label": "Threshold comparators",
+      "description": "Nominal one-third and two-thirds VCC decision boundaries."
+    },
+    {
+      "id": "storage",
+      "label": "State and reset",
+      "description": "A Boolean state abstraction of the published device function table."
+    },
+    {
+      "id": "drivers",
+      "label": "Output control",
+      "description": "Logical output state and whether the discharge transistor conducts."
+    },
+    {
+      "id": "external",
+      "label": "External timing circuit",
+      "description": "Not simulated by the Boolean engine."
+    }
+  ],
+  "inputs": [
+    {
+      "id": "reset_n",
+      "label": "RESET released",
+      "kind": "boolean",
+      "default": true,
+      "pin": "RESET",
+      "group": "pins",
+      "description": "False represents an asserted valid low reset. True represents reset voltage above the datasheet maximum reset threshold, not any arbitrary voltage.",
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "trigger",
+      "label": "TRIG / VCC",
+      "kind": "number",
+      "default": 0.6,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "unit": "V/VCC",
+      "group": "pins",
+      "description": "Trigger voltage normalized to the fixed supply; a value below one third requests the high output state.",
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "threshold",
+      "label": "THRES / VCC",
+      "kind": "number",
+      "default": 0.4,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "unit": "V/VCC",
+      "group": "pins",
+      "description": "Threshold voltage normalized to the supply; above two thirds resets the latch when trigger is inactive.",
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "io",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "blocks": [
+    {
+      "id": "trigger_low",
+      "label": "Trigger comparator",
+      "kind": "comparator",
+      "group": "comparators",
+      "description": "TRIG below nominal VCC / 3. Exact equality is unknown in this behavioral model because the table does not specify it.",
+      "rule": {
+        "op": "lt",
+        "args": [
+          {
+            "var": "trigger"
+          },
+          0.3333333333333333
+        ]
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "threshold_high",
+      "label": "Threshold comparator",
+      "kind": "comparator",
+      "group": "comparators",
+      "description": "THRES above nominal 2 VCC / 3. This is a nominal decision, not the electrical tolerance envelope.",
+      "rule": {
+        "op": "gt",
+        "args": [
+          {
+            "var": "threshold"
+          },
+          0.6666666666666666
+        ]
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "reset_active",
+      "label": "Reset control",
+      "kind": "gate",
+      "group": "storage",
+      "description": "An asserted low RESET overrides the trigger and threshold states.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "var": "reset_n"
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "latch_q",
+      "label": "Timer state",
+      "kind": "latch",
+      "initial": "X",
+      "group": "storage",
+      "description": "Reset first; then active trigger sets; then active threshold clears; otherwise retain the previous state. Initial state is intentionally unspecified.",
+      "rule": {
+        "op": "if",
+        "args": [
+          {
+            "var": "reset_active"
+          },
+          false,
+          {
+            "op": "if",
+            "args": [
+              {
+                "var": "trigger_low"
+              },
+              true,
+              {
+                "op": "if",
+                "args": [
+                  {
+                    "var": "threshold_high"
+                  },
+                  false,
+                  {
+                    "var": "latch_q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "out_high",
+      "label": "Output driver",
+      "kind": "gate",
+      "group": "drivers",
+      "description": "Logical OUT state. A high result does not assert rail-to-rail output voltage or a particular drive current.",
+      "rule": {
+        "var": "latch_q"
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "discharge_on",
+      "label": "Discharge transistor",
+      "kind": "gate",
+      "group": "drivers",
+      "description": "True means the discharge switch is ON and can sink current. It does not mean the DISCH pin is driven high.",
+      "rule": {
+        "op": "not",
+        "args": [
+          {
+            "var": "latch_q"
+          }
+        ]
+      },
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "primary_derived",
+      "category": "logic",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    },
+    {
+      "id": "rc_network",
+      "label": "RC timing boundary",
+      "kind": "boundary",
+      "group": "external",
+      "description": "External resistor/capacitor behavior belongs to a continuous-time circuit model.",
+      "reason": "No analog solver: RC charging, leakage, tolerances, supply ramp, and oscillation period are not represented.",
+      "sourceRefs": [
+        "ti_555"
+      ],
+      "evidence": "unspecified",
+      "category": "context",
+      "scale": "logic",
+      "geometry": {
+        "kind": "logical",
+        "evidence": "illustrative",
+        "sourceRefs": []
+      },
+      "properties": []
+    }
+  ],
+  "outputs": [
+    {
+      "id": "out_pin",
+      "label": "OUT logic",
+      "signal": "out_high",
+      "pin": "OUT",
+      "description": "Boolean output-driver state.",
+      "sourceRefs": [
+        "ti_555"
+      ]
+    },
+    {
+      "id": "discharge_switch",
+      "label": "DISCH conducts",
+      "signal": "discharge_on",
+      "pin": "DISCH",
+      "description": "Discharge-switch conduction, not its pin voltage.",
+      "sourceRefs": [
+        "ti_555"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "reset_priority",
+      "text": "Valid asserted reset forces low output and discharge on, independently of comparator states.",
+      "signals": [
+        "out_high",
+        "discharge_on"
+      ],
+      "sourceRefs": [
+        "ti_555"
+      ]
+    },
+    {
+      "id": "trigger_priority",
+      "text": "With reset released and CONT at its nominal value, trigger below VCC/3 sets output high regardless of threshold.",
+      "signals": [
+        "trigger_low",
+        "out_high",
+        "discharge_on"
+      ],
+      "sourceRefs": [
+        "ti_555"
+      ]
+    },
+    {
+      "id": "threshold_reset",
+      "text": "Inactive trigger and threshold above 2VCC/3 produce low output and discharge on.",
+      "signals": [
+        "threshold_high",
+        "out_high",
+        "discharge_on"
+      ],
+      "sourceRefs": [
+        "ti_555"
+      ]
+    },
+    {
+      "id": "hold_state",
+      "text": "Inactive trigger and threshold below 2VCC/3 retain the previously established state.",
+      "signals": [
+        "latch_q",
+        "out_high"
+      ],
+      "sourceRefs": [
+        "ti_555"
+      ]
+    },
+    {
+      "id": "unspecified_state",
+      "text": "Model policy: unspecified power-on state and exact nominal comparator equality are X, not invented guarantees.",
+      "signals": [
+        "latch_q",
+        "trigger_low",
+        "threshold_high"
+      ],
+      "sourceRefs": [
+        "ti_555"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "id": "reset",
+      "label": "Reset overrides both comparators",
+      "requirements": [
+        "reset_priority"
+      ],
+      "steps": [
+        {
+          "set": {
+            "reset_n": false,
+            "trigger": 0.1,
+            "threshold": 0.9
+          },
+          "expect": {
+            "out_high": false,
+            "discharge_on": true
+          }
+        },
+        {
+          "set": {
+            "trigger": 0.8,
+            "threshold": 0.1
+          },
+          "expect": {
+            "out_high": false,
+            "discharge_on": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "trigger",
+      "label": "Trigger priority and release",
+      "requirements": [
+        "trigger_priority",
+        "hold_state"
+      ],
+      "steps": [
+        {
+          "set": {
+            "trigger": 0.1,
+            "threshold": 0.9
+          },
+          "expect": {
+            "trigger_low": true,
+            "out_high": true,
+            "discharge_on": false
+          }
+        },
+        {
+          "set": {
+            "trigger": 0.6,
+            "threshold": 0.5
+          },
+          "expect": {
+            "latch_q": true,
+            "out_high": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "threshold",
+      "label": "Threshold clears a set latch",
+      "requirements": [
+        "threshold_reset",
+        "hold_state"
+      ],
+      "steps": [
+        {
+          "set": {
+            "trigger": 0.1
+          },
+          "expect": {
+            "out_high": true
+          }
+        },
+        {
+          "set": {
+            "trigger": 0.6,
+            "threshold": 0.9
+          },
+          "expect": {
+            "threshold_high": true,
+            "out_high": false,
+            "discharge_on": true
+          }
+        },
+        {
+          "set": {
+            "threshold": 0.4
+          },
+          "expect": {
+            "latch_q": false,
+            "out_high": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "Unknown startup and equality",
+      "requirements": [
+        "unspecified_state"
+      ],
+      "steps": [
+        {
+          "set": {},
+          "expect": {
+            "latch_q": "X",
+            "out_high": "X",
+            "trigger_low": false,
+            "threshold_high": false
+          }
+        },
+        {
+          "set": {
+            "trigger": 0.3333333333333333,
+            "threshold": 0.6666666666666666
+          },
+          "expect": {
+            "latch_q": "X",
+            "trigger_low": "X",
+            "threshold_high": "X"
+          }
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "VCC is constant and within the recommended range; normalized inputs refer to that supply.",
+    "CONT is open or at nominal 2VCC/3, as required by Table 6-1 note 2 for trigger priority.",
+    "RESET is an already-classified valid Boolean input; its analog threshold is not simulated.",
+    "Zero-delay event steps model settled behavior only. Comparator equality and unspecified power-on state remain X."
+  ],
+  "omissions": [
+    "RC charging and oscillator timing, analog waveforms, comparator tolerances, propagation delays, minimum pulse widths, and metastability.",
+    "Electrical output levels/current, discharge resistance, absolute maximum ratings, temperature behavior, supply ramp, and CONT modulation.",
+    "No transistor netlist or electrical equivalence proof; passing vectors covers only the declared function-table abstraction."
+  ]
+}
