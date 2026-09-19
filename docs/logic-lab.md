@@ -1,8 +1,10 @@
 # Logic Lab: Models, Evidence, And Extension
 
-The Logic Lab is the first reusable specification layer of SiliconCity. It complements the existing Hexagon city instead of reinterpreting its illustrative workload counters as a gate-level chip model. Open `logic.html` through the Vite server or production build; the architecture city has a **Logic Lab** link.
+The Logic Lab is the reusable specification layer of SiliconCity. It complements the existing Hexagon city instead of reinterpreting its illustrative workload counters as a gate-level chip model. [Open the Logic Lab](https://eoinjordan.github.io/SiliconCity/logic.html), or open `logic.html` through the Vite server or production build. The architecture city has a **Logic Lab** link.
 
-The [recorded preview](media/logic-lab.gif) is captured from the actual browser app. To regenerate it with Playwright Chromium and FFmpeg installed, start the local server and run `node tools/record-logic.mjs http://127.0.0.1:4180/`. Capture frames are temporary and are removed after encoding; the generated GIF is validated and a decoded check frame is placed in the system temporary directory.
+The [recorded preview](media/logic-lab.gif) was refreshed on 2026-09-19 from a fresh production build. Its 84 frames at 6 fps cover all seven examples: 555/NAND truth tables, unsupported branch behavior remaining `X`, MCU/MPU/NPU interrupt conditions, and a LUT feeding two explicitly clocked FPGA registers. The script asserts the displayed outputs and all vector reports; playback speed is edited, not physical time.
+
+To regenerate it with Playwright Chromium and FFmpeg installed, run `npm run build`, start `npm run preview -- --host 127.0.0.1 --port 4180 --strictPort`, then run `node tools/record-logic.mjs http://127.0.0.1:4180/`. Add `--city` to refresh the four Hexagon city GIFs too. The recorder rebuilds before capture, removes temporary frames, verifies encoded dimensions/frame counts, and leaves decoded check frames in the system temporary directory. [Recording metadata](media/recording.json) retains source/build/recorder/GIF hashes and sampled outputs. The recorded source commit can precede a media-only commit; the source-input hash identifies the tracked build inputs actually captured.
 
 ## Current Examples
 

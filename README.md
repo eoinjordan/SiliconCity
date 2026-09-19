@@ -1,12 +1,19 @@
 # SiliconCity
 
-SiliconCity combines an architectural city with a source-linked **Logic Lab** for
-declarative chip and subsystem models. The existing Hexagon explorer remains at
-the site root; the new lab is [logic.html](logic.html), also linked from its toolbar.
+SiliconCity is an independent architectural teaching atlas with two experiences:
+
+| Open | Current scope |
+| --- | --- |
+| [Logic Lab](https://eoinjordan.github.io/SiliconCity/logic.html) | Seven source-linked component, CPU/ISA, MCU, MPU, NPU, and FPGA examples with executable subsystem logic |
+| [Architecture City](https://eoinjordan.github.io/SiliconCity/) | The existing Hexagon NPU explorer with illustrative workloads, inspection, and a guided tour |
+
+The root still opens the Hexagon city; its toolbar links to the lab. These views
+do not execute complete chips, reconstruct physical die layouts, or measure
+silicon performance. Optional native/runtime measurements are separate.
 
 ## Specification-Driven Logic Lab
 
-![Expanding 555 subsystems and local truth tables, then testing a NAND gate](docs/media/logic-lab.gif)
+![Seven Logic Lab examples: truth tables, unknown behavior, interrupt conditions, and clocked FPGA state](docs/media/logic-lab.gif)
 
 - Expand and collapse subsystem diagrams, including nested groups.
 - Filter the reference catalog by device class, from discrete logic to FPGA.
@@ -51,20 +58,18 @@ semantics, provenance rules, limitations, and validation workflow. The agent
 transcribes and verifies primary sources; the browser does not automatically
 convert a datasheet PDF into a proven chip implementation.
 
-The [cross-vendor roadmap](README.md.txt) guides future architecture work.
-Its complete vendor maps and physical floorplans are not implied by these
-bounded subsystem examples.
+The [cross-vendor roadmap](README.md.txt) separates the implemented foundation
+from proposed full-device maps. Its older research section contains unresolved
+source placeholders and is not a verified source ledger. Use the examples'
+source records and [authoring guide](docs/logic-lab.md) for current contracts.
 
 ## Hexagon Architecture City
 
-**Walk through the Qualcomm Hexagon NPU. Watch a tensor flow. Understand on-device AI.**
+The city depicts scalar, vector, and tensor accelerators around shared local
+memory, with host CPU, GPU, and sensing context outside the NPU. Its animated
+dataflow and workload meters are deterministic teaching models, not executed
+inference or telemetry. It runs in a browser with WebGL2; no native SDK is needed.
 
-An explorable 3D model where districts are the parts of the Hexagon™ NPU and
-motion is the dataflow between them. Follow an inference from weights in memory,
-through the scalar, vector and tensor accelerators fused around a shared memory,
-and back out again.
-
-No installation to explore — it runs in a browser with WebGL2. View here: https://eoinjordan.github.io/SiliconCity/
 ### The NPU at a glance
 
 Districts are NPU components; the moving particles are the dataflow (cyan activations, orange weights from DRAM). Press `N` to swing between night and day.
@@ -77,10 +82,6 @@ Press `T` to follow one inference through the fused pipeline — the camera glid
 
 ![Guided tour gliding between the VTCM, scalar, HVX and HMX districts](docs/media/tour.gif)
 
-<img width="1464" height="779" alt="image" src="https://github.com/user-attachments/assets/0071aecc-552a-451d-8658-1ae4b6670ccc" />
-
-
-
 > **Independent & non-commercial.** Not affiliated with, sponsored by, or endorsed
 > by Qualcomm. Hexagon, Snapdragon, Adreno and Oryon are trademarks of Qualcomm
 > Incorporated. Every number shown is **illustrative** and scaled to be readable —
@@ -91,11 +92,11 @@ same thing for PostgreSQL.
 
 ## Native and measured runtimes
 
-Android ARM64 and Windows ARM64 shells can run a small, output-checked ONNX
+Android ARM64 and Windows ARM64 shells implement a small, output-checked ONNX
 arithmetic workload with explicit CPU/QNN selection. The default Android preview
 is CPU-only; a QNN-enabled build requires matching SDK libraries. Windows has a
-QNN-backed build and MSI packaging workflow. Actual Snapdragon execution and MSI
-installation still require target-device verification.
+QNN-enabled ARM64 build and MSI packaging workflow. Packaging and CPU tests are
+not proof of Snapdragon execution or successful installation on a target device.
 
 Ollama, llama.cpp and LM Studio adapters provide separate measured timings through
 an opt-in local service, never inferred NPU utilization. See the
@@ -110,10 +111,20 @@ and its [QNN example](https://github.com/edgeimpulse/example-android-inferencing
 
 > Recorded from the running app. Everything on screen is **illustrative** (a teaching model), not a hardware measurement.
 
+All five GIFs were rebuilt and captured on 2026-09-19. The Logic Lab loop has
+84 frames at 6 fps and exercises all seven examples; its recorder asserts truth
+table results, explicit unknowns, interrupt masks, and FPGA clocked state. The
+four city loops have 24 frames at 3 fps. Their edited playback is not a timing
+benchmark. [Recording metadata](docs/media/recording.json) retains source/build/
+recorder/GIF hashes and observed outputs or selected controls.
 
 ### Quantization / precision
 
-Switch **format** (INT4 → INT8 → INT16 → FP16) and the HMX *Tensor TOPS* and *tokens/s* readouts scale with the chosen precision — this is how the model represents quantization. The coefficients are illustrative; the arithmetic of integer affine quantization is verified separately in [docs/verification.md](docs/verification.md).
+Switching **format** (INT4, INT8, INT16, FP16) selects illustrative coefficients
+for the HMX *Tensor TOPS* and *tokens/s* meters. It does not quantize or run a
+network, establish a format support matrix, or predict hardware speedup. Integer
+affine quantization arithmetic is checked separately in
+[docs/verification.md](docs/verification.md).
 
 ![Cycling precision from INT4 to FP16 while the tensor TOPS and tokens per second change](docs/media/quantization.gif)
 
@@ -126,8 +137,9 @@ Switch **workload** — LLM decode, Vision / conv, Idle — and watch the scalar
 ## Quick start
 
 ```bash
-npm install
+npm ci
 npm run dev      # open the printed localhost URL
+# Open /logic.html for the seven-example Logic Lab, or / for the Hexagon city.
 ```
 
 ```bash
@@ -138,7 +150,44 @@ npm test           # module unit and component integration tests
 npm run test:coverage
 npm run test:browser # real WebGL component tests (install Chromium first)
 npm run test:app     # production app tests under a Pages-style subpath
+npm run validate:specs # source-linked model/vector validation
+npm run test:logic     # production Logic Lab tests on desktop and mobile
 ```
+
+Use Node.js 24 to match CI; install the browser with `npx playwright install
+chromium`. The 2026-09-19 local pass completed 111 source tests, all seven spec
+validations, typecheck, build, and 34 browser checks: eight engine, ten city, and
+16 Logic Lab checks. These are scoped verification results, not full-device
+conformance, exhaustive accessibility coverage, or native acceleration evidence.
+
+To regenerate the README media, start the production preview in one terminal:
+
+```bash
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4180 --strictPort
+```
+
+Then, with FFmpeg and Playwright Chromium installed:
+
+```bash
+node tools/record-logic.mjs http://127.0.0.1:4180/ --city
+```
+
+The recorder rebuilds the app, checks the scripted outcomes, and updates all
+five GIFs and their metadata. Omit `--city` to record only the Logic Lab.
+
+## Website Deployment
+
+GitHub Pages is configured to use **GitHub Actions**, with both entry points
+served from the same relative-base production build. [CI](.github/workflows/ci.yml)
+runs audit, types, specs, coverage, browser suites, and Android/Windows build
+checks. The [Pages workflow](.github/workflows/deploy.yml) publishes the artifact
+from a successful `main` CI run, not an unchecked local build.
+
+If Pages has been disabled or the repository moved, restore Settings > Pages >
+Source > GitHub Actions before retrying deployment. A green build alone does
+not enable a missing Pages site. After a push, check both the CI and deployment
+runs and verify the city and `logic.html` URLs, including their assets.
 
 ## What you are looking at
 
@@ -220,7 +269,10 @@ src/
   engine/   renderer, camera rig, CSS2D labels, dataflow, picking
   world/    the districts: ground, VTCM, accelerators, tiling, system context
   ui/       HUD, inspector, guided tour, help overlay, keyboard controls
+  spec/     Logic Lab schema, Boolean/state engine, diagrams, views, and controls
   main.ts   boot + wiring
+specs/      seven data-only models, source ledgers, vectors, and generated schema
+tools/      validators, media recorder, and separate native/runtime tooling
 ```
 
 ## License

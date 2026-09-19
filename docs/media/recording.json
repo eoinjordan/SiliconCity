@@ -1,0 +1,520 @@
+{
+  "schema": "siliconcity-recordings/v1",
+  "kind": "educational-preview-recordings",
+  "sourceCommit": "5b3d84e71d4ede0cf257896fcf526701a9e65351",
+  "sourceInputSha256": "c10ef52e9dfbf37fe32badeb413f2bd14b5f2d6683fdd9bbf68c2dafa37c0a3f",
+  "buildIndexSha256": "85c2239a88dd03766f91daf652702e19caad62456fcb28617c19bf182aced073",
+  "buildLogicSha256": "5c2a400d6418b6e6428d420e0fdb08b93244e89e9139860b509920019bf08506",
+  "recorderSha256": "61eaa5c0ead6d5062099de3ee8b688a856f30713dd2815d1ce2c37215ccf7c38",
+  "timing": "Edited model progression, not wall-clock silicon performance",
+  "nativeDeviceExecution": false,
+  "recordedAt": "2026-09-19T21:49:15.280Z",
+  "pageErrors": 0,
+  "logicMobileOverflow": false,
+  "recordings": [
+    {
+      "file": "logic-lab.gif",
+      "frames": 84,
+      "playbackFramesPerSecond": 6,
+      "width": 960,
+      "height": 600,
+      "duration": "14.000000",
+      "nb_read_frames": "84",
+      "bytes": 707719,
+      "sha256": "a20b737193dcfdd3a7b44794dd6b27754878f3be1ddcf21614b3850f2c7cb951",
+      "scenario": "Seven examples: 555 and NAND truth tables, unsupported branch X, MCU/MPU/NPU interrupt conditions, then FPGA LUT and two explicit clock pulses.",
+      "observations": [
+        {
+          "frame": 0,
+          "device": "ne555",
+          "checks": "22 / 22",
+          "coverage": "5 / 5",
+          "outputs": [
+            "OUT logicX",
+            "DISCH conductsX"
+          ]
+        },
+        {
+          "frame": 6,
+          "device": "ne555",
+          "checks": "22 / 22",
+          "coverage": "5 / 5",
+          "outputs": [
+            "OUT logic1",
+            "DISCH conducts0"
+          ]
+        },
+        {
+          "frame": 12,
+          "device": "sn74hc00",
+          "checks": "24 / 24",
+          "coverage": "2 / 2",
+          "outputs": [
+            "1Y1",
+            "2Y1",
+            "3Y1",
+            "4Y1"
+          ]
+        },
+        {
+          "frame": 18,
+          "device": "sn74hc00",
+          "checks": "24 / 24",
+          "coverage": "2 / 2",
+          "outputs": [
+            "1Y0",
+            "2Y1",
+            "3Y1",
+            "4Y1"
+          ]
+        },
+        {
+          "frame": 24,
+          "device": "rv32i_branch",
+          "checks": "12 / 12",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Inside modeled scope1",
+            "Take branch1"
+          ]
+        },
+        {
+          "frame": 30,
+          "device": "rv32i_branch",
+          "checks": "12 / 12",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Inside modeled scope0",
+            "Take branchX"
+          ]
+        },
+        {
+          "frame": 36,
+          "device": "stm32f103_mcu",
+          "checks": "25 / 25",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Edge selected0",
+            "EXTI IRQ request0",
+            "EXTI event eligible0",
+            "Exception eligible0"
+          ]
+        },
+        {
+          "frame": 42,
+          "device": "stm32f103_mcu",
+          "checks": "25 / 25",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Edge selected0",
+            "EXTI IRQ request1",
+            "EXTI event eligible0",
+            "Exception eligible1"
+          ]
+        },
+        {
+          "frame": 48,
+          "device": "imx6ull_mpu",
+          "checks": "18 / 18",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Candidate forwarded0",
+            "Priority passes mask1",
+            "CPU signaling eligible0"
+          ]
+        },
+        {
+          "frame": 54,
+          "device": "imx6ull_mpu",
+          "checks": "18 / 18",
+          "coverage": "3 / 3",
+          "outputs": [
+            "Candidate forwarded1",
+            "Priority passes mask1",
+            "CPU signaling eligible1"
+          ]
+        },
+        {
+          "frame": 60,
+          "device": "nvdla_v1",
+          "checks": "44 / 44",
+          "coverage": "4 / 4",
+          "outputs": [
+            "Request accepted0",
+            "Read response owed0",
+            "Write completion owed0",
+            "Bank write allowed0",
+            "Host IRQ asserted0"
+          ]
+        },
+        {
+          "frame": 66,
+          "device": "nvdla_v1",
+          "checks": "44 / 44",
+          "coverage": "4 / 4",
+          "outputs": [
+            "Request accepted0",
+            "Read response owed0",
+            "Write completion owed0",
+            "Bank write allowed0",
+            "Host IRQ asserted1"
+          ]
+        },
+        {
+          "frame": 72,
+          "device": "artix7_fpga",
+          "checks": "60 / 60",
+          "coverage": "4 / 4",
+          "outputs": [
+            "LUT6 result0",
+            "Register stage 00",
+            "Register stage 10",
+            "Selected output route0",
+            "Final carry CO30",
+            "Carry XOR output O30"
+          ]
+        },
+        {
+          "frame": 78,
+          "device": "artix7_fpga",
+          "checks": "60 / 60",
+          "coverage": "4 / 4",
+          "outputs": [
+            "LUT6 result1",
+            "Register stage 01",
+            "Register stage 10",
+            "Selected output route1",
+            "Final carry CO30",
+            "Carry XOR output O30"
+          ]
+        },
+        {
+          "frame": 83,
+          "device": "artix7_fpga",
+          "checks": "60 / 60",
+          "coverage": "4 / 4",
+          "outputs": [
+            "LUT6 result1",
+            "Register stage 01",
+            "Register stage 11",
+            "Selected output route1",
+            "Final carry CO30",
+            "Carry XOR output O30"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "overview.gif",
+      "frames": 24,
+      "playbackFramesPerSecond": 3,
+      "width": 960,
+      "height": 600,
+      "duration": "8.000000",
+      "nb_read_frames": "24",
+      "bytes": 728283,
+      "sha256": "bfdc33d4be34a9e3e1563798045b05170328d6a3572e77dd97d25fe5954fe828",
+      "scenario": "Hexagon city overview: illustrative activity only; no native runtime connected.",
+      "observations": [
+        {
+          "frame": 0,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS31.5 INT8Tokens / s43.3Power (W)2.8 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 3,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.6 INT8Tokens / s51.8Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 6,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.2 INT8Tokens / s52.6Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 9,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS36.3 INT8Tokens / s50Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 12,
+          "theme": "day",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS35.5 INT8Tokens / s48.9Power (W)3.0 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 15,
+          "theme": "day",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS36.6 INT8Tokens / s50.5Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 18,
+          "theme": "day",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.3 INT8Tokens / s52.7Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 21,
+          "theme": "day",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.3 INT8Tokens / s51.4Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        }
+      ]
+    },
+    {
+      "file": "tour.gif",
+      "frames": 24,
+      "playbackFramesPerSecond": 3,
+      "width": 960,
+      "height": 600,
+      "duration": "8.000000",
+      "nb_read_frames": "24",
+      "bytes": 1286491,
+      "sha256": "bca0737cb8e768255f4d71d77ebd5e9f1eaf4216b2f02bf08a9f78f89f51aa34",
+      "scenario": "Hexagon city tour: illustrative activity only; no native runtime connected.",
+      "observations": [
+        {
+          "frame": 0,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS33.2 INT8Tokens / s45.8Power (W)2.9 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "The Hexagon NPU, from above"
+        },
+        {
+          "frame": 3,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS35.6 INT8Tokens / s49Power (W)3.0 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "VTCM — the shared memory"
+        },
+        {
+          "frame": 6,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS36.1 INT8Tokens / s49.7Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "Micro-tile inferencing"
+        },
+        {
+          "frame": 9,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.1 INT8Tokens / s51.1Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "The scalar accelerator"
+        },
+        {
+          "frame": 12,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37 INT8Tokens / s51Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "HVX — the vector engine"
+        },
+        {
+          "frame": 15,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.8 INT8Tokens / s52Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "HMX — the tensor engine"
+        },
+        {
+          "frame": 18,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.2 INT8Tokens / s52.7Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "Heterogeneous compute"
+        },
+        {
+          "frame": 21,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.3 INT8Tokens / s52.8Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": "Always-on efficiency"
+        }
+      ]
+    },
+    {
+      "file": "quantization.gif",
+      "frames": 24,
+      "playbackFramesPerSecond": 3,
+      "width": 960,
+      "height": 600,
+      "duration": "8.000000",
+      "nb_read_frames": "24",
+      "bytes": 578218,
+      "sha256": "9c20556d979aa61d9738e2fd123d45125df2ff3d92bb1848af5f8a1a43193f06",
+      "scenario": "Hexagon city quantization: illustrative activity only; no native runtime connected.",
+      "observations": [
+        {
+          "frame": 0,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT4",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS60.6 INT4Tokens / s72Power (W)2.9 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 3,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT4",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS64.7 INT4Tokens / s76.8Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 6,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.4 INT8Tokens / s51.5Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 9,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.3 INT8Tokens / s52.8Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 12,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT16",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS18.5 INT16Tokens / s28.5Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 15,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT16",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS17.5 INT16Tokens / s27Power (W)3.0 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 18,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "FP16",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS15.7 FP16Tokens / s23.6Power (W)3.1 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 21,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "FP16",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS16.4 FP16Tokens / s24.6Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        }
+      ]
+    },
+    {
+      "file": "workloads.gif",
+      "frames": 24,
+      "playbackFramesPerSecond": 3,
+      "width": 960,
+      "height": 600,
+      "duration": "8.000000",
+      "nb_read_frames": "24",
+      "bytes": 549885,
+      "sha256": "20558b52e86d7900ff1dd97e0c9eb8e0fbf3da9fe64c9705181e9dea69deb725",
+      "scenario": "Hexagon city workloads: illustrative activity only; no native runtime connected.",
+      "observations": [
+        {
+          "frame": 0,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS30.6 INT8Tokens / s42.1Power (W)2.7 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 3,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS37.8 INT8Tokens / s52Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 6,
+          "theme": "night",
+          "workload": "llm-decode",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS38.1 INT8Tokens / s52.4Power (W)3.2 WWorkloadLLM decodeScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 9,
+          "theme": "night",
+          "workload": "vision-conv",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS41.6 INT8Tokens / s—Power (W)3.5 WWorkloadVision / convScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 12,
+          "theme": "night",
+          "workload": "vision-conv",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS39.9 INT8Tokens / s—Power (W)3.4 WWorkloadVision / convScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 15,
+          "theme": "night",
+          "workload": "vision-conv",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS40.8 INT8Tokens / s—Power (W)3.5 WWorkloadVision / convScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 18,
+          "theme": "night",
+          "workload": "idle",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS2.1 INT8Tokens / s—Power (W)0.6 WWorkloadIdleScalHVXHMXVTCM",
+          "tour": null
+        },
+        {
+          "frame": 21,
+          "theme": "night",
+          "workload": "idle",
+          "precision": "INT8",
+          "status": "Illustrative model - not hardware measurementsTensor TOPS1.9 INT8Tokens / s—Power (W)0.6 WWorkloadIdleScalHVXHMXVTCM",
+          "tour": null
+        }
+      ]
+    }
+  ]
+}

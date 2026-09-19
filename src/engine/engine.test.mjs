@@ -139,7 +139,7 @@ test('label layer sizes, projects, clips and removes labels with their scene obj
   labels.render(scene, camera)
   assert.ok(container.contains(element))
   assert.equal(element.style.display, '')
-  assert.match(element.style.transform, /200px,120px/)
+  assert.match(element.style.transform, /translate\(200px,\s*120px\)/)
   label.position.z = 10
   labels.render(scene, camera)
   assert.equal(element.style.display, 'none')

@@ -1,4 +1,42 @@
-# SiliconCity and the Case for a Cross-Vendor “Silicon City” Architecture Atlas
+# SiliconCity: Current Roadmap and Historical Atlas Research
+
+## Current Status (2026-09-19)
+
+This document contains an older research proposal below. It is not a description
+of the complete shipped product and its unresolved `citeturn...` tokens are not
+usable citations. Recheck primary documents before adopting any proposed device
+facts. The [README](README.md) and [Logic Lab guide](docs/logic-lab.md) describe
+the current implementation; each model in `specs/` carries its own source ledger.
+
+| Area | Implemented now | Still proposed |
+| --- | --- | --- |
+| Hexagon city | Illustrative workloads, source-linked districts, inspection, tour, native/runtime interfaces kept separate | Migration of the city into a common whole-device architecture schema |
+| Data and provenance | Validated data-only specs, evidence categories, source-linked properties, hierarchy and unexecuted architectural boundaries | Complete vendor maps or independently verified physical geometry |
+| Executable models | Seven bounded examples: NE555, SN74HC00, RV32I branch slice, STM32F103C8, i.MX 6ULL, NVDLA v1, Artix 7 primitive network | Complete CPUs, SoCs, vendor toolchains, analog dynamics or silicon timing |
+| Views | Shared City/Logic graph, nested expansion, local truth tables, event traces, vector reports, JSON import/export | Chiplet/package, board, thermal, memory-traffic and scale-out views |
+| Verification | 111 source tests and 34 desktop/mobile browser checks; schema and independent declared-vector validation | Full-device conformance, exhaustive accessibility or measured native-device performance |
+
+The current i.MX **6ULL** example is not an i.MX **95** map; the NVDLA example
+is not a TPU or Hexagon emulator; the configured Artix 7 network is not a full
+FPGA or a loaded vendor bitstream. GPU and SoC schema classifications do not
+mean those complete models are bundled. `QC 477M` remains an unverified identity.
+
+## Next Delivery Steps
+
+1. Extend one bounded subsystem with independently transcribed vectors and an
+  appropriate external oracle before expanding device coverage.
+2. Audit primary sources for proposed TPU v4 and i.MX 95 logical maps. Keep
+  unavailable execution behavior and physical placement explicitly unknown.
+3. Add hierarchy/package or trace views only when they share validated model
+  state and provenance; do not duplicate chip behavior inside a renderer.
+4. Preserve the current Hexagon/native boundaries and all web/native CI gates.
+  Pages publishes both web entry points only after successful `main` CI.
+
+No delivery dates or complete vendor maps are committed by this roadmap. The
+candidate devices and visual ideas in the historical research are proposals,
+not current capabilities or verified hardware specifications.
+
+## Historical Research
 
 ## Executive summary
 
@@ -34,9 +72,9 @@ flowchart LR
 
 That architecture would preserve the approachable “city” metaphor while allowing each processor family to express what is genuinely distinctive about it.
 
-## SiliconCity audit
+## Historical Hexagon-Only Audit
 
-The audit below is based on the deployed site's public page, repository README, verification notes, native-runtime documentation, package manifest and HTML layout. The deployed page itself identifies the project as an independent, non-commercial educational 3D visualisation, while the repository is unusually explicit about which architectural statements are public facts and which visual/behavioural values are synthetic. citeturn21view1turn21view2
+The audit below predates the seven-example Logic Lab and must not be used to infer current deployment status or complete product scope. It describes the earlier Hexagon view, not the reusable specification engine and cross-vendor subsystem models now shipped. Its source placeholders have not been resolved into a verified ledger.
 
 **Visualisation catalogue**
 
@@ -249,39 +287,14 @@ The architecture schema should be independent of those layouts. A single MI300X 
 
 ## Implementation roadmap, validation and IP
 
-The roadmap should first turn SiliconCity from a device-specific application into a **data-driven rendering engine**, then expand the hardware catalogue. Building sixteen bespoke scenes independently would rapidly create inconsistent conventions and an unmaintainable source/audit burden.
+The first reusable data-driven layer is now implemented in the Logic Lab. The
+original Hexagon city remains separate; full-device schema migration and the
+broader hardware catalogue below are still proposed. Reuse the existing schema,
+engine and views before adding another device-specific renderer.
 
-```mermaid
-gantt
-    title Recommended Silicon-City programme
-    dateFormat  YYYY-MM-DD
-    axisFormat  %b %Y
-
-    section Foundation
-    Architecture schema and provenance      :a1, 2026-10-01, 5w
-    Shared visual grammar and validation    :a2, after a1, 3w
-
-    section Reference maps
-    TPU v4 and NXP i.MX 95 pilots           :b1, after a2, 6w
-    H100 and MI300X                          :b2, after b1, 7w
-
-    section Edge and adaptive
-    Ethos-U55, STM32N6, Versal              :c1, after b2, 7w
-    Tenstorrent and SiFive                   :c2, after c1, 5w
-
-    section Client and mobile
-    Qualcomm, Intel, Apple                   :d1, after c2, 7w
-    MediaTek, Samsung, Huawei                :d2, after d1, 7w
-
-    section Dynamic views
-    Traces, dataflow, thermal, memory        :e1, after b2, 12w
-    Package and scale-out views              :e2, after e1, 8w
-
-    section Release hardening
-    Accessibility, performance and IP audit  :f1, after d2, 5w
-```
-
-Dates in this chart are proposed engineering milestones, not claims about vendor release schedules.
+The earlier date-based schedule has been retired. The following phases are a
+candidate order subject to source availability, scoped tests and review, not a
+release timetable. The Logic Lab has already delivered part of the foundation.
 
 | Phase | Principal milestone | Sample deliverables | Validation gate |
 |---|---|---|---|
