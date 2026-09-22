@@ -21,7 +21,7 @@
     <Content Include="../../LICENSE;../../NOTICE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="RequireWebAssets" BeforeTargets="Build">
-    <Error Condition="!Exists('../../dist/index.html')" Text="Run npm run native:prepare first." />
+    <Error Condition="!Exists('../../dist/hexagon.html')" Text="Run npm run native:prepare first." />
   </Target>
   <Target Name="RemoveUnusedWpfReference" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>

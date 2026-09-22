@@ -22,7 +22,7 @@ function execute(command, args) {
 const sha256 = (data) => createHash('sha256').update(data).digest('hex')
 const recordings = []
 execute('npm', ['run', 'build'])
-const inputs = execute('git', ['ls-files', '-z', '--', 'src', 'specs', 'public', 'index.html', 'logic.html', 'package.json', 'package-lock.json', 'tsconfig.json', 'vite.config.ts']).split('\0').filter(Boolean).sort()
+const inputs = execute('git', ['ls-files', '-z', '--', 'src', 'specs', 'public', 'index.html', 'logic.html', 'hexagon.html', 'package.json', 'package-lock.json', 'tsconfig.json', 'vite.config.ts']).split('\0').filter(Boolean).sort()
 const sourceHash = createHash('sha256')
 for (const file of inputs) sourceHash.update(file).update('\0').update(await readFile(join(root, file))).update('\0')
 const provenance = {
@@ -32,6 +32,7 @@ const provenance = {
   sourceInputSha256: sourceHash.digest('hex'),
   buildIndexSha256: sha256(await readFile(join(root, 'dist/index.html'))),
   buildLogicSha256: sha256(await readFile(join(root, 'dist/logic.html'))),
+  buildHexagonSha256: sha256(await readFile(join(root, 'dist/hexagon.html'))),
   recorderSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
   timing: 'Edited model progression, not wall-clock silicon performance',
   nativeDeviceExecution: false,
@@ -60,7 +61,7 @@ async function recordCity(browser, name) {
   const observations = []
   page.on('pageerror', (error) => errors.push(error.message))
   try {
-    await page.goto(new URL('./', url).href)
+    await page.goto(new URL('hexagon.html', url).href)
     await page.locator('#boot').waitFor({ state: 'hidden' })
     await page.evaluate(() => document.fonts.ready)
     const initialTheme = await page.locator('html').getAttribute('data-theme')

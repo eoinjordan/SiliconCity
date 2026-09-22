@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   page.integrationErrors = errors
   await page.clock.install({ time: new Date('2026-09-17T12:00:00Z') })
   await page.clock.pauseAt(new Date('2026-09-17T12:00:01Z'))
-  await page.goto('./')
+  await page.goto('hexagon.html')
   await expect(page.locator('#canvas-root canvas')).toHaveCount(1)
   await page.clock.fastForward(100)
   await page.clock.fastForward(1000)

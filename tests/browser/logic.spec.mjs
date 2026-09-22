@@ -24,10 +24,27 @@ test.beforeEach(async ({ page }) => {
   page.on('response', (response) => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`) })
   page.integrationErrors = errors
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('logic.html')
+  await page.goto('./')
   await expect(page.locator('#city-view')).toHaveAttribute('data-rendered', 'true')
 })
 test.afterEach(async ({ page }) => { expect(page.integrationErrors).toEqual([]) })
+
+test('homepage opens SiliconCity and preserves the legacy view routes', async ({ page }) => {
+  await expect(page).toHaveTitle('SiliconCity | Logic Lab')
+  await expect(page.locator('#device option')).toHaveCount(7)
+  await expect(page.locator('#stage')).toHaveCount(0)
+  await page.getByRole('link', { name: 'Architecture city', exact: true }).click()
+  await expect(page).toHaveURL(/\/__pages_test__\/hexagon\.html$/)
+  await expect(page.locator('#canvas-root canvas')).toBeVisible()
+  await expect(page.locator('#boot')).toBeHidden()
+  await page.getByRole('link', { name: 'Open SiliconCity Logic Lab' }).click()
+  await expect(page).toHaveURL(/\/__pages_test__\/logic\.html$/)
+  await expect(page.locator('#city-view')).toHaveAttribute('data-rendered', 'true')
+  await page.locator('.lab-brand').click()
+  await expect(page).toHaveURL(/\/__pages_test__\/$/)
+  await expect(page).toHaveTitle('SiliconCity | Logic Lab')
+  await expect(page.locator('#city-view')).toHaveAttribute('data-rendered', 'true')
+})
 
 test('city renders a framed graph with a readable responsive interface', async ({ page }, testInfo) => {
   await expectCityPixels(page)

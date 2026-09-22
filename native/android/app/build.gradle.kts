@@ -32,7 +32,7 @@ val copyWeb by tasks.registering(Sync::class) {
     from("../../models") { into("models") }
     into(layout.buildDirectory.dir("generated/assets"))
     doFirst {
-        require(file("../../../dist/index.html").isFile) { "Run npm run native:prepare first" }
+        require(file("../../../dist/hexagon.html").isFile) { "Run npm run native:prepare first" }
         require(file("../../models/matmul-qdq.onnx").isFile) { "Run npm run native:prepare first" }
     }
 }

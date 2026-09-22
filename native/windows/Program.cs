@@ -34,7 +34,7 @@ internal sealed class MainWindow : Form
         try
         {
             string webPath = Path.Combine(AppContext.BaseDirectory, "web");
-            if (!File.Exists(Path.Combine(webPath, "index.html"))) throw new FileNotFoundException("Bundled web assets are missing");
+            if (!File.Exists(Path.Combine(webPath, "hexagon.html"))) throw new FileNotFoundException("Bundled web assets are missing");
             string dataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SiliconCity", "WebView2");
             var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: dataPath);
             await web.EnsureCoreWebView2Async(environment);
@@ -45,7 +45,7 @@ internal sealed class MainWindow : Form
             web.CoreWebView2.NavigationStarting += (_, args) => args.Cancel = !Trusted(args.Uri);
             web.CoreWebView2.NewWindowRequested += (_, args) => args.Handled = true;
             web.CoreWebView2.WebMessageReceived += Receive;
-            web.CoreWebView2.Navigate(Origin + "/index.html");
+            web.CoreWebView2.Navigate(Origin + "/hexagon.html");
         }
         catch (Exception error)
         {

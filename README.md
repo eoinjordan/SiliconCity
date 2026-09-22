@@ -4,10 +4,12 @@ SiliconCity is an independent architectural teaching atlas with two experiences:
 
 | Open | Current scope |
 | --- | --- |
-| [Logic Lab](https://eoinjordan.github.io/SiliconCity/logic.html) | Seven source-linked component, CPU/ISA, MCU, MPU, NPU, and FPGA examples with executable subsystem logic |
-| [Architecture City](https://eoinjordan.github.io/SiliconCity/) | The existing Hexagon NPU explorer with illustrative workloads, inspection, and a guided tour |
+| [Logic Lab](https://eoinjordan.github.io/SiliconCity/) | Seven source-linked component, CPU/ISA, MCU, MPU, NPU, and FPGA examples with executable subsystem logic |
+| [Architecture City](https://eoinjordan.github.io/SiliconCity/hexagon.html) | The existing Hexagon NPU explorer with illustrative workloads, inspection, and a guided tour |
 
-The root still opens the Hexagon city; its toolbar links to the lab. These views
+The root opens the SiliconCity Logic Lab; `/logic.html` remains a compatible alias.
+The lab's architecture link opens `/hexagon.html`, and the Hexagon toolbar links
+back to the lab. Native shells continue to open the Hexagon view explicitly. These views
 do not execute complete chips, reconstruct physical die layouts, or measure
 silicon performance. Optional native/runtime measurements are separate.
 
@@ -47,7 +49,7 @@ not been verified.
 ```bash
 npm ci
 npm run dev
-# Open /logic.html on the printed local URL.
+# Open / on the printed local URL.
 npm run validate:specs
 npm run test:logic
 ```
@@ -139,7 +141,7 @@ Switch **workload** — LLM decode, Vision / conv, Idle — and watch the scalar
 ```bash
 npm ci
 npm run dev      # open the printed localhost URL
-# Open /logic.html for the seven-example Logic Lab, or / for the Hexagon city.
+# Open / for the seven-example Logic Lab, or /hexagon.html for the Hexagon city.
 ```
 
 ```bash
@@ -178,7 +180,7 @@ five GIFs and their metadata. Omit `--city` to record only the Logic Lab.
 
 ## Website Deployment
 
-GitHub Pages is configured to use **GitHub Actions**, with both entry points
+GitHub Pages is configured to use **GitHub Actions**, with all three HTML entries
 served from the same relative-base production build. [CI](.github/workflows/ci.yml)
 runs audit, types, specs, coverage, browser suites, and Android/Windows build
 checks. The [Pages workflow](.github/workflows/deploy.yml) publishes the artifact
@@ -187,7 +189,7 @@ from a successful `main` CI run, not an unchecked local build.
 If Pages has been disabled or the repository moved, restore Settings > Pages >
 Source > GitHub Actions before retrying deployment. A green build alone does
 not enable a missing Pages site. After a push, check both the CI and deployment
-runs and verify the city and `logic.html` URLs, including their assets.
+runs and verify `/`, `logic.html`, and `hexagon.html`, including their assets.
 
 ## What you are looking at
 

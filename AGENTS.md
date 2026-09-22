@@ -4,8 +4,8 @@
 
 SiliconCity is a source-aware architectural teaching atlas, not a silicon emulator. Preserve the distinction between published facts, derived behavior, illustrative presentation, and separately measured runtime data.
 
-- `index.html` and `src/{core,sim,engine,world,ui}/` contain the existing Hexagon architecture city. Preserve its controls, tours, native/runtime interfaces, and explicit illustrative metrics.
-- `logic.html` and `src/spec/lab.ts` contain the specification-driven Logic Lab. Its models are data-only JSON in `specs/`, discovered automatically at build time.
+- `index.html`, the compatible `logic.html` alias, and `src/spec/lab.ts` contain the specification-driven Logic Lab, the default SiliconCity experience. Its models are data-only JSON in `specs/`, discovered automatically at build time.
+- `hexagon.html` and `src/{core,sim,engine,world,ui}/` contain the existing Hexagon architecture city. Preserve its controls, tours, native/runtime interfaces, and explicit illustrative metrics. Native shells open this entry explicitly.
 - `src/spec/schema.ts` owns the Zod schema and semantic validation. `specs/chip.schema.json` is generated, not hand-edited.
 - `src/spec/engine.ts` owns Boolean evaluation, explicit state, unknown propagation, event traces, and vector reports. It uses JSON Logic; do not introduce `eval`, arbitrary JavaScript, or dynamic code loading from specifications.
 - `src/spec/diagram.ts` derives hierarchy, connections, and local truth tables from the validated model. `src/spec/view.ts` renders that same graph in Three.js and SVG. Do not duplicate device behavior in the renderer.
@@ -39,7 +39,7 @@ npm run test:logic
 - Focused model tests: `node --import tsx --test 'src/spec/*.test.mjs'`.
 - Regenerate the schema after schema changes: `npm run spec:schema`. The tests compare it with the schema source.
 - If shared Hexagon UI or rendering changes: run `npm run test:browser` and `npm run test:app` too. CI also runs coverage and native checks; do not weaken those jobs to make new examples pass.
-- Preview: `npm run dev -- --host 127.0.0.1`, then open `/logic.html` for the lab or `/` for the architecture city. Respect the relative Pages base and both Vite entry points.
+- Preview: `npm run dev -- --host 127.0.0.1`, then open `/` (or `/logic.html`) for the lab and `/hexagon.html` for the architecture city. Respect the relative Pages base and all three Vite HTML entries.
 - Browser tests use production assets under `/__pages_test__/`, check real canvas pixels and framing, and run desktop/mobile projects. A successful build alone is not visual validation.
 
 ## Engine And UI Constraints

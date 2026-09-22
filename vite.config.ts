@@ -8,7 +8,7 @@ export default defineConfig({
     target: 'es2022',
     sourcemap: false,
     rollupOptions: {
-      input: { city: 'index.html', logic: 'logic.html' },
+      input: { atlas: 'index.html', city: 'hexagon.html', logic: 'logic.html' },
     },
   },
 })

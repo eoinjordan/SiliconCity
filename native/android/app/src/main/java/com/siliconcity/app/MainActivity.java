@@ -77,7 +77,7 @@ public final class MainActivity extends Activity {
             } catch (Exception ignored) { }
         });
         setContentView(webView);
-        webView.loadUrl(ORIGIN + "/assets/web/index.html");
+        webView.loadUrl(ORIGIN + "/assets/web/hexagon.html");
     }
 
     @Override protected void onPause() {
